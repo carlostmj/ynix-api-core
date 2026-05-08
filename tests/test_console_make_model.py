@@ -69,3 +69,35 @@ def test_make_controller_with_all_creates_full_scaffold(tmp_path, monkeypatch):
     assert (module_dir / "service.py").exists()
     assert (module_dir / "controller.py").exists()
     assert (module_dir / "routes.py").exists()
+
+
+def test_make_model_accepts_compact_flag_bundle(tmp_path, monkeypatch):
+    import console.commands.writer as writer
+
+    monkeypatch.setattr(writer, "ROOT", tmp_path)
+
+    make_model(["invoice", "-cr"])
+
+    module_dir = tmp_path / "app" / "modules" / "invoice"
+    assert (module_dir / "controller.py").exists()
+    assert (module_dir / "repository.py").exists()
+    assert not (module_dir / "models.py").exists()
+    assert not (module_dir / "schemas.py").exists()
+    assert not (module_dir / "service.py").exists()
+    assert not (module_dir / "routes.py").exists()
+
+
+def test_make_module_accepts_all_short_flag(tmp_path, monkeypatch):
+    import console.commands.writer as writer
+
+    monkeypatch.setattr(writer, "ROOT", tmp_path)
+
+    make_module(["billing", "-a"])
+
+    module_dir = tmp_path / "app" / "modules" / "billing"
+    assert (module_dir / "models.py").exists()
+    assert (module_dir / "schemas.py").exists()
+    assert (module_dir / "repository.py").exists()
+    assert (module_dir / "service.py").exists()
+    assert (module_dir / "controller.py").exists()
+    assert (module_dir / "routes.py").exists()

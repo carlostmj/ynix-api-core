@@ -32,6 +32,14 @@ PART_TO_TEMPLATE = {
     "routes": ROUTES_TEMPLATE,
 }
 
+SHORT_FLAG_MAP = {
+    "m": "--model",
+    "c": "--controller",
+    "s": "--service",
+    "r": "--repository",
+    "a": "--all",
+}
+
 
 @dataclass(slots=True)
 class ScaffoldOptions:
@@ -52,8 +60,8 @@ def parse_scaffold_args(args: list[str], prog: str) -> ScaffoldOptions:
     parser.add_argument("--m", "--model", action="store_true", dest="model")
     parser.add_argument("--sc", "--schema", action="store_true", dest="schema")
     parser.add_argument("--r", "--repository", action="store_true", dest="repository")
-    parser.add_argument("--all", action="store_true")
-    namespace = parser.parse_args(args)
+    parser.add_argument("-a", "--all", action="store_true")
+    namespace = parser.parse_args(_expand_compact_flags(args))
     return ScaffoldOptions(
         name=namespace.name,
         model=namespace.model,
@@ -63,6 +71,22 @@ def parse_scaffold_args(args: list[str], prog: str) -> ScaffoldOptions:
         controller=namespace.controller,
         all=namespace.all,
     )
+
+
+def _expand_compact_flags(args: list[str]) -> list[str]:
+    expanded: list[str] = []
+    for arg in args:
+        if _is_compact_flag_bundle(arg):
+            expanded.extend(SHORT_FLAG_MAP[flag] for flag in arg[1:])
+            continue
+        expanded.append(arg)
+    return expanded
+
+
+def _is_compact_flag_bundle(value: str) -> bool:
+    if not value.startswith("-") or value.startswith("--") or len(value) <= 2:
+        return False
+    return all(flag in SHORT_FLAG_MAP for flag in value[1:])
 
 
 def emit_scaffold(name: str, options: ScaffoldOptions, default_parts: tuple[str, ...]) -> None:

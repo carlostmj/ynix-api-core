@@ -361,7 +361,7 @@ Em producao, o core bloqueia configuracoes perigosas como `APP_DEBUG=true`, `CRE
 
 ```bash
 python console/manager.py make:module pix
-python console/manager.py make:module pix --all
+python console/manager.py make:module pix -a
 ```
 
 Isso cria:
@@ -384,32 +384,35 @@ python console/manager.py make:service user
 python console/manager.py make:schema user
 python console/manager.py make:repository user
 python console/manager.py make:model user
-python console/manager.py make:model user --m
-python console/manager.py make:model user --c
-python console/manager.py make:model user --s
-python console/manager.py make:model user --sc
-python console/manager.py make:model user --r
+python console/manager.py make:model user -m
+python console/manager.py make:model user -c
+python console/manager.py make:model user -s
+python console/manager.py make:model user -sc
+python console/manager.py make:model user -r
+python console/manager.py make:model user -cr
 python console/manager.py make:model user --all
-python console/manager.py make:controller user --all
-python console/manager.py make:service user --all
-python console/manager.py make:schema user --all
-python console/manager.py make:repository user --all
+python console/manager.py make:controller user -a
+python console/manager.py make:service user -a
+python console/manager.py make:schema user -a
+python console/manager.py make:repository user -a
 ```
 
 ### Alias global
 
 ```bash
-python console/manager.py create:model user --all
+python console/manager.py create:model user -a
 ```
 
 ### Flags suportadas
 
 - `--all`
+- `-a` atalho para `--all`
 - `--m` ou `--model`
 - `--c` ou `--controller`
 - `--s` ou `--service`
 - `--sc` ou `--schema`
 - `--r` ou `--repository`
+- flags curtas podem ser agrupadas, por exemplo `-cr` ou `-mcr`
 
 Comportamento:
 
