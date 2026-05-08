@@ -25,15 +25,64 @@ from console.kernel import ArtisanKernel
 
 def build_kernel() -> ArtisanKernel:
     kernel = ArtisanKernel()
-    kernel.register("make:module", make_module, requires_name=True, accepts_flags=True)
-    kernel.register("make:controller", make_controller, requires_name=True, accepts_flags=True)
-    kernel.register("make:service", make_service, requires_name=True, accepts_flags=True)
-    kernel.register("make:model", make_model, requires_name=True, accepts_flags=True)
-    kernel.register("create:model", make_model, requires_name=True, accepts_flags=True)
-    kernel.register("make:schema", make_schema, requires_name=True, accepts_flags=True)
-    kernel.register("make:repository", make_repository, requires_name=True, accepts_flags=True)
-    kernel.register("create:admin", create_admin, accepts_flags=True)
-    kernel.register("status", lambda _: print_status())
+    kernel.register(
+        "make:module",
+        make_module,
+        requires_name=True,
+        accepts_flags=True,
+        help="Cria o scaffold completo de um modulo",
+    )
+    kernel.register(
+        "make:controller",
+        make_controller,
+        requires_name=True,
+        accepts_flags=True,
+        help="Cria um controller de modulo",
+    )
+    kernel.register(
+        "make:service",
+        make_service,
+        requires_name=True,
+        accepts_flags=True,
+        help="Cria um service de modulo",
+    )
+    kernel.register(
+        "make:model",
+        make_model,
+        requires_name=True,
+        accepts_flags=True,
+        help="Cria um scaffold parcial ou completo a partir de um model",
+    )
+    kernel.register(
+        "create:model",
+        make_model,
+        requires_name=True,
+        accepts_flags=True,
+        help="Alias de make:model",
+    )
+    kernel.register(
+        "make:schema",
+        make_schema,
+        requires_name=True,
+        accepts_flags=True,
+        help="Cria o arquivo schemas.py",
+    )
+    kernel.register(
+        "make:repository",
+        make_repository,
+        requires_name=True,
+        accepts_flags=True,
+        help="Cria o arquivo repository.py",
+    )
+    kernel.register(
+        "create:admin",
+        create_admin,
+        accepts_flags=True,
+        help="Cria ou promove um usuario para administrador",
+    )
+    kernel.register("status", lambda _: print_status(), help="Mostra o status do ambiente")
+    kernel.register("list", lambda _: print(kernel.render_list()), help="Lista todos os comandos")
+    kernel.register("help", lambda args: print(kernel.render_help(args[0] if args else None)), help="Mostra ajuda")
 
     for command_name in [
         "create:api-key",
@@ -43,7 +92,7 @@ def build_kernel() -> ArtisanKernel:
         "clear:logs",
         "system:stats",
     ]:
-        kernel.register(command_name, not_implemented(command_name))
+        kernel.register(command_name, not_implemented(command_name), help="Comando reservado para evolucao")
 
     return kernel
 

@@ -105,6 +105,16 @@ class Settings(BaseSettings):
         if self.app_env.lower() in {"prod", "production"}:
             if self.jwt_secret == "change-me" or len(self.jwt_secret) < 32:
                 raise ValueError("JWT_SECRET precisa ter pelo menos 32 caracteres em produção")
+            if self.app_debug:
+                raise ValueError("APP_DEBUG precisa estar desativado em produção")
+            if self.create_tables_on_startup:
+                raise ValueError("CREATE_TABLES_ON_STARTUP precisa estar desativado em produção")
+            if not self.rate_limit_enabled:
+                raise ValueError("RATE_LIMIT_ENABLED precisa estar ativado em produção")
+            if self.request_log_save_body:
+                raise ValueError("REQUEST_LOG_SAVE_BODY precisa estar desativado em produção")
+            if "*" in self.cors_origins:
+                raise ValueError("CORS_ORIGINS nao pode conter '*' em producao")
         return self
 
     @property

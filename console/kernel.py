@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
 from collections.abc import Callable
+from dataclasses import dataclass
 
 CommandHandler = Callable[[list[str]], None]
 
@@ -48,7 +48,46 @@ class ArtisanKernel:
         parsed = parser.parse_args(argv)
         self.dispatch(parsed.command, parsed.args)
 
+    def render_list(self) -> str:
+        lines = ["Comandos disponiveis:"]
+        for name in self.names():
+            definition = self._commands[name]
+            description = definition.help or ""
+            suffix = f" - {description}" if description else ""
+            lines.append(f"  {name}{suffix}")
+        return "\n".join(lines)
+
+    def render_help(self, command_name: str | None = None) -> str:
+        if command_name is None:
+            lines = [
+                "Uso: python console/manager.py <comando> [args...]",
+                "",
+                self.render_list(),
+                "",
+                "Use 'help <comando>' para ver detalhes de um comando.",
+            ]
+            return "\n".join(lines)
+
+        definition = self.get(command_name)
+        if definition is None:
+            raise SystemExit(f"Comando desconhecido: {command_name}")
+
+        lines = [f"Comando: {command_name}"]
+        if definition.help:
+            lines.append(f"Descricao: {definition.help}")
+        lines.append(f"Aceita flags: {'sim' if definition.accepts_flags else 'nao'}")
+        lines.append(f"Exige nome: {'sim' if definition.requires_name else 'nao'}")
+        return "\n".join(lines)
+
     def dispatch(self, name: str, args: list[str]) -> None:
+        if name == "list":
+            print(self.render_list())
+            return
+        if name == "help":
+            command_name = args[0] if args else None
+            print(self.render_help(command_name))
+            return
+
         definition = self.get(name)
         if definition is None:
             raise SystemExit("Comando invalido")

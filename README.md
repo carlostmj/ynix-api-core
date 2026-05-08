@@ -15,6 +15,7 @@ Este core foi desenhado para ser duplicado e virar a base de novos produtos da Y
 - fila de jobs com modo `sync` ou `redis`
 - scheduler com tasks periodicas
 - CLI estilo Artisan para criar modulos e entidades
+- `help`, `list` e `status` no console
 - migrations com Alembic
 - testes automatizados com Pytest
 
@@ -352,6 +353,8 @@ alembic check
 
 Em desenvolvimento, `CREATE_TABLES_ON_STARTUP=true` permite iniciar sem migrations manuais. Em producao, prefira Alembic.
 
+Em producao, o core bloqueia configuracoes perigosas como `APP_DEBUG=true`, `CREATE_TABLES_ON_STARTUP=true`, `RATE_LIMIT_ENABLED=false`, `REQUEST_LOG_SAVE_BODY=true` e `CORS_ORIGINS=*`.
+
 ## CLI De Modulos
 
 ### Criar modulo completo
@@ -422,6 +425,8 @@ python console/manager.py
 python console/manager.py create:admin
 python console/manager.py create:admin --name "Maria Admin" --email maria@example.com --password password123 --password-confirmation password123
 python console/manager.py status
+python console/manager.py help make:model
+python console/manager.py list
 ```
 
 `create:admin` suporta as flags `--name`, `--email`, `--password` e `--password-confirmation`.
@@ -437,6 +442,8 @@ python console/manager.py status
 - `make:repository`
 - `create:admin`
 - `status`
+- `help`
+- `list`
 
 ### Comandos reservados para evolucao
 
