@@ -138,9 +138,12 @@ python console/manage.py make:service pix
 python console/manage.py make:model charge
 python console/manage.py make:schema charge
 python console/manage.py make:repository pix
+python console/manage.py make:model user --all
+python console/manage.py create:model user --c --s --sc --r
 ```
 
 O comando `make:module` cria a estrutura completa de arquivos dentro de `app/modules/<nome>/`.
+O comando `make:model` aceita atalhos globais para criar apenas partes do modulo, ou tudo de uma vez com `--all`.
 
 ## Console
 

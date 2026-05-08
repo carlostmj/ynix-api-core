@@ -28,7 +28,8 @@ def build_registry() -> CommandRegistry:
     registry.register("make:module", lambda args: make_module(args[0]))
     registry.register("make:controller", lambda args: make_controller(args[0]))
     registry.register("make:service", lambda args: make_service(args[0]))
-    registry.register("make:model", lambda args: make_model(args[0]))
+    registry.register("make:model", make_model)
+    registry.register("create:model", make_model)
     registry.register("make:schema", lambda args: make_schema(args[0]))
     registry.register("make:repository", lambda args: make_repository(args[0]))
     registry.register("create:admin", create_admin)
@@ -61,6 +62,7 @@ def main() -> None:
         "make:controller",
         "make:service",
         "make:model",
+        "create:model",
         "make:schema",
         "make:repository",
     }
