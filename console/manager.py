@@ -65,14 +65,14 @@ def build_kernel() -> ArtisanKernel:
         make_schema,
         requires_name=True,
         accepts_flags=True,
-        help="Cria o arquivo schemas.py",
+        help="Cria o schema do modulo em schemas/",
     )
     kernel.register(
         "make:repository",
         make_repository,
         requires_name=True,
         accepts_flags=True,
-        help="Cria o arquivo repository.py",
+        help="Cria o repository do modulo em repositories/",
     )
     kernel.register(
         "create:admin",

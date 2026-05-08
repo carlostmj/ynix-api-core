@@ -3,34 +3,53 @@ from dataclasses import dataclass
 
 from console.commands.templates import (
     CONTROLLER_TEMPLATE,
+    OBSERVER_TEMPLATE,
     MODEL_TEMPLATE,
     REPOSITORY_TEMPLATE,
     ROUTES_TEMPLATE,
-    SCHEMA_TEMPLATE,
+    SCHEMA_CREATE_REQUEST_TEMPLATE,
+    SCHEMA_RESPONSE_TEMPLATE,
+    SCHEMA_UPDATE_REQUEST_TEMPLATE,
     SERVICE_TEMPLATE,
 )
 from console.commands.writer import module_dir, write_file
 
-PART_FLAG_ORDER = ("model", "schema", "repository", "service", "controller")
-PART_ORDER = ("model", "schema", "repository", "service", "controller", "routes")
+PART_FLAG_ORDER = ("model", "schema", "repository", "service", "controller", "observer")
+PART_ORDER = ("model", "schema", "repository", "service", "controller", "routes", "observer")
+
+PART_TO_DIRECTORY = {
+    "model": "models",
+    "schema": "schemas",
+    "repository": "repositories",
+    "service": "services",
+    "controller": "controllers",
+    "routes": "routes",
+    "observer": "observers",
+}
 
 PART_TO_FILENAME = {
-    "model": "models.py",
-    "schema": "schemas.py",
-    "repository": "repository.py",
-    "service": "service.py",
-    "controller": "controller.py",
-    "routes": "routes.py",
+    "model": "{entity_slug}.py",
+    "repository": "{entity_slug}_repository.py",
+    "service": "{entity_slug}_service.py",
+    "controller": "{entity_slug}_controller.py",
+    "routes": "{entity_slug}_routes.py",
+    "observer": "{entity_slug}_observer.py",
 }
 
 PART_TO_TEMPLATE = {
     "model": MODEL_TEMPLATE,
-    "schema": SCHEMA_TEMPLATE,
     "repository": REPOSITORY_TEMPLATE,
     "service": SERVICE_TEMPLATE,
     "controller": CONTROLLER_TEMPLATE,
     "routes": ROUTES_TEMPLATE,
+    "observer": OBSERVER_TEMPLATE,
 }
+
+SCHEMA_FILE_SPECS = (
+    ("create_request", "{entity_slug}_create_request.py", SCHEMA_CREATE_REQUEST_TEMPLATE),
+    ("update_request", "{entity_slug}_update_request.py", SCHEMA_UPDATE_REQUEST_TEMPLATE),
+    ("response", "{entity_slug}_response.py", SCHEMA_RESPONSE_TEMPLATE),
+)
 
 SHORT_FLAG_MAP = {
     "m": "--model",
@@ -38,6 +57,7 @@ SHORT_FLAG_MAP = {
     "s": "--service",
     "r": "--repository",
     "a": "--all",
+    "o": "--observer",
 }
 
 
@@ -49,18 +69,20 @@ class ScaffoldOptions:
     repository: bool = False
     service: bool = False
     controller: bool = False
+    observer: bool = False
     all: bool = False
 
 
 def parse_scaffold_args(args: list[str], prog: str) -> ScaffoldOptions:
     parser = argparse.ArgumentParser(prog=prog)
     parser.add_argument("name")
-    parser.add_argument("--c", "--controller", action="store_true", dest="controller")
-    parser.add_argument("--s", "--service", action="store_true", dest="service")
-    parser.add_argument("--m", "--model", action="store_true", dest="model")
-    parser.add_argument("--sc", "--schema", action="store_true", dest="schema")
-    parser.add_argument("--r", "--repository", action="store_true", dest="repository")
-    parser.add_argument("-a", "--all", action="store_true")
+    parser.add_argument("-c", "--c", "--controller", action="store_true", dest="controller")
+    parser.add_argument("-s", "--s", "--service", action="store_true", dest="service")
+    parser.add_argument("-m", "--m", "--model", action="store_true", dest="model")
+    parser.add_argument("-sc", "--sc", "--schema", action="store_true", dest="schema")
+    parser.add_argument("-r", "--r", "--repository", action="store_true", dest="repository")
+    parser.add_argument("-o", "--o", "--observer", action="store_true", dest="observer")
+    parser.add_argument("-a", "--a", "--all", action="store_true", dest="all")
     namespace = parser.parse_args(_expand_compact_flags(args))
     return ScaffoldOptions(
         name=namespace.name,
@@ -69,6 +91,7 @@ def parse_scaffold_args(args: list[str], prog: str) -> ScaffoldOptions:
         repository=namespace.repository,
         service=namespace.service,
         controller=namespace.controller,
+        observer=namespace.observer,
         all=namespace.all,
     )
 
@@ -76,17 +99,27 @@ def parse_scaffold_args(args: list[str], prog: str) -> ScaffoldOptions:
 def _expand_compact_flags(args: list[str]) -> list[str]:
     expanded: list[str] = []
     for arg in args:
-        if _is_compact_flag_bundle(arg):
-            expanded.extend(SHORT_FLAG_MAP[flag] for flag in arg[1:])
+        if arg == "-sc":
+            expanded.append("--schema")
             continue
-        expanded.append(arg)
+        if not arg.startswith("-") or arg.startswith("--") or len(arg) <= 2:
+            expanded.append(arg)
+            continue
+
+        translated = []
+        for flag in arg[1:]:
+            mapped = SHORT_FLAG_MAP.get(flag)
+            if mapped is None:
+                translated = []
+                break
+            translated.append(mapped)
+
+        if translated:
+            expanded.extend(translated)
+        else:
+            expanded.append(arg)
+
     return expanded
-
-
-def _is_compact_flag_bundle(value: str) -> bool:
-    if not value.startswith("-") or value.startswith("--") or len(value) <= 2:
-        return False
-    return all(flag in SHORT_FLAG_MAP for flag in value[1:])
 
 
 def emit_scaffold(name: str, options: ScaffoldOptions, default_parts: tuple[str, ...]) -> None:
@@ -95,9 +128,15 @@ def emit_scaffold(name: str, options: ScaffoldOptions, default_parts: tuple[str,
 
     parts = resolve_parts(options, default_parts)
     for part in parts:
-        filename = PART_TO_FILENAME[part]
+        package_dir = path / PART_TO_DIRECTORY[part]
+        write_file(package_dir / "__init__.py", "")
+        if part == "schema":
+            for _, filename_template, template in SCHEMA_FILE_SPECS:
+                write_file(package_dir / filename_template.format(**context), template.substitute(context))
+            continue
+        filename = PART_TO_FILENAME[part].format(**context)
         template = PART_TO_TEMPLATE[part]
-        write_file(path / filename, template.substitute(context))
+        write_file(package_dir / filename, template.substitute(context))
 
 
 def resolve_parts(options: ScaffoldOptions, default_parts: tuple[str, ...]) -> tuple[str, ...]:

@@ -16,5 +16,4 @@ def write_file(path: Path, content: str) -> None:
 
 def module_dir(name: str) -> tuple[Path, dict[str, str]]:
     context = module_context(name)
-    return ROOT / "app" / "modules" / context["slug"], context
-
+    return ROOT / "app" / "modules" / Path(context["module_path"]), context

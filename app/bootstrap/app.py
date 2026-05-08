@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.bootstrap.routes import register_routes
-from app.bootstrap.services import import_models
+from app.bootstrap.services import import_models, import_observers
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.exceptions import register_exception_handlers
@@ -31,6 +31,7 @@ def create_app() -> FastAPI:
     register_exception_handlers(app)
     register_routes(app)
     import_models()
+    import_observers()
 
     if settings.create_tables_on_startup:
         try:
@@ -53,7 +54,7 @@ def create_app() -> FastAPI:
 
 def _bootstrap_admin_user() -> None:
     from app.core.database import SessionLocal
-    from app.modules.admin.service import bootstrap_admin_user
+    from app.modules.admin.services import bootstrap_admin_user
 
     db = SessionLocal()
     try:

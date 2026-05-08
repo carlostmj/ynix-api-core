@@ -14,7 +14,7 @@ from fastapi.testclient import TestClient
 from app.bootstrap.services import import_models
 from app.core.database import Base, engine
 from app.main import app
-from app.modules.admin.service import bootstrap_admin_user
+from app.modules.admin.services import bootstrap_admin_user
 
 
 @pytest.fixture(autouse=True)

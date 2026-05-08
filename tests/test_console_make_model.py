@@ -1,103 +1,103 @@
+from pathlib import Path
+
+from console.commands.make_controller import make_controller
 from console.commands.make_model import make_model
 from console.commands.make_module import make_module
-from console.commands.make_controller import make_controller
 
 
-def test_make_model_with_all_creates_complete_scaffold(tmp_path, monkeypatch):
+def _module_root(tmp_path, *parts: str):
+    return tmp_path / "app" / "modules" / Path(*parts)
+
+
+def test_make_module_with_all_creates_nested_scaffold(tmp_path, monkeypatch):
     import console.commands.writer as writer
 
     monkeypatch.setattr(writer, "ROOT", tmp_path)
 
-    make_model(["user", "--all"])
+    make_module(["user", "-a"])
 
-    module_dir = tmp_path / "app" / "modules" / "user"
+    module_dir = _module_root(tmp_path, "user")
     assert (module_dir / "__init__.py").exists()
-    assert (module_dir / "models.py").exists()
-    assert (module_dir / "schemas.py").exists()
-    assert (module_dir / "repository.py").exists()
-    assert (module_dir / "service.py").exists()
-    assert (module_dir / "controller.py").exists()
-    assert (module_dir / "routes.py").exists()
+    assert (module_dir / "models" / "__init__.py").exists()
+    assert (module_dir / "models" / "user.py").exists()
+    assert (module_dir / "schemas" / "__init__.py").exists()
+    assert (module_dir / "schemas" / "user_create_request.py").exists()
+    assert (module_dir / "schemas" / "user_update_request.py").exists()
+    assert (module_dir / "schemas" / "user_response.py").exists()
+    assert (module_dir / "repositories" / "__init__.py").exists()
+    assert (module_dir / "repositories" / "user_repository.py").exists()
+    assert (module_dir / "services" / "__init__.py").exists()
+    assert (module_dir / "services" / "user_service.py").exists()
+    assert (module_dir / "controllers" / "__init__.py").exists()
+    assert (module_dir / "controllers" / "user_controller.py").exists()
+    assert (module_dir / "routes" / "__init__.py").exists()
+    assert (module_dir / "routes" / "user_routes.py").exists()
+    assert (module_dir / "observers" / "__init__.py").exists()
+    assert (module_dir / "observers" / "user_observer.py").exists()
 
 
-def test_make_model_with_selective_flags_creates_only_requested_files(tmp_path, monkeypatch):
+def test_make_model_with_selective_flags_creates_only_requested_parts(tmp_path, monkeypatch):
     import console.commands.writer as writer
 
     monkeypatch.setattr(writer, "ROOT", tmp_path)
 
-    make_model(["account", "--c", "--sc"])
+    make_model(["account", "-c", "-sc"])
 
-    module_dir = tmp_path / "app" / "modules" / "account"
+    module_dir = _module_root(tmp_path, "account")
     assert (module_dir / "__init__.py").exists()
-    assert not (module_dir / "models.py").exists()
-    assert (module_dir / "schemas.py").exists()
-    assert not (module_dir / "repository.py").exists()
-    assert not (module_dir / "service.py").exists()
-    assert (module_dir / "controller.py").exists()
-    assert not (module_dir / "routes.py").exists()
+    assert not (module_dir / "models").exists()
+    assert (module_dir / "schemas" / "__init__.py").exists()
+    assert (module_dir / "schemas" / "account_create_request.py").exists()
+    assert (module_dir / "schemas" / "account_update_request.py").exists()
+    assert (module_dir / "schemas" / "account_response.py").exists()
+    assert not (module_dir / "repositories").exists()
+    assert not (module_dir / "services").exists()
+    assert (module_dir / "controllers" / "__init__.py").exists()
+    assert (module_dir / "controllers" / "account_controller.py").exists()
+    assert not (module_dir / "routes").exists()
 
 
-def test_make_module_accepts_flags_and_creates_partial_scaffold(tmp_path, monkeypatch):
+def test_make_module_accepts_path_and_compact_flags(tmp_path, monkeypatch):
     import console.commands.writer as writer
 
     monkeypatch.setattr(writer, "ROOT", tmp_path)
 
-    make_module(["billing", "--m", "--sc"])
+    make_module(["Web/User", "-cr"])
 
-    module_dir = tmp_path / "app" / "modules" / "billing"
+    module_dir = _module_root(tmp_path, "web", "user")
     assert (module_dir / "__init__.py").exists()
-    assert (module_dir / "models.py").exists()
-    assert (module_dir / "schemas.py").exists()
-    assert not (module_dir / "repository.py").exists()
-    assert not (module_dir / "service.py").exists()
-    assert not (module_dir / "controller.py").exists()
-    assert not (module_dir / "routes.py").exists()
+    assert not (module_dir / "models").exists()
+    assert not (module_dir / "schemas").exists()
+    assert not (module_dir / "services").exists()
+    assert (module_dir / "controllers" / "__init__.py").exists()
+    assert (module_dir / "controllers" / "user_controller.py").exists()
+    assert (module_dir / "repositories" / "__init__.py").exists()
+    assert (module_dir / "repositories" / "user_repository.py").exists()
+    assert not (module_dir / "routes").exists()
 
 
-def test_make_controller_with_all_creates_full_scaffold(tmp_path, monkeypatch):
+def test_make_controller_with_all_creates_full_nested_scaffold(tmp_path, monkeypatch):
     import console.commands.writer as writer
 
     monkeypatch.setattr(writer, "ROOT", tmp_path)
 
-    make_controller(["orders", "--all"])
+    make_controller(["orders", "-a"])
 
-    module_dir = tmp_path / "app" / "modules" / "orders"
+    module_dir = _module_root(tmp_path, "orders")
     assert (module_dir / "__init__.py").exists()
-    assert (module_dir / "models.py").exists()
-    assert (module_dir / "schemas.py").exists()
-    assert (module_dir / "repository.py").exists()
-    assert (module_dir / "service.py").exists()
-    assert (module_dir / "controller.py").exists()
-    assert (module_dir / "routes.py").exists()
-
-
-def test_make_model_accepts_compact_flag_bundle(tmp_path, monkeypatch):
-    import console.commands.writer as writer
-
-    monkeypatch.setattr(writer, "ROOT", tmp_path)
-
-    make_model(["invoice", "-cr"])
-
-    module_dir = tmp_path / "app" / "modules" / "invoice"
-    assert (module_dir / "controller.py").exists()
-    assert (module_dir / "repository.py").exists()
-    assert not (module_dir / "models.py").exists()
-    assert not (module_dir / "schemas.py").exists()
-    assert not (module_dir / "service.py").exists()
-    assert not (module_dir / "routes.py").exists()
-
-
-def test_make_module_accepts_all_short_flag(tmp_path, monkeypatch):
-    import console.commands.writer as writer
-
-    monkeypatch.setattr(writer, "ROOT", tmp_path)
-
-    make_module(["billing", "-a"])
-
-    module_dir = tmp_path / "app" / "modules" / "billing"
-    assert (module_dir / "models.py").exists()
-    assert (module_dir / "schemas.py").exists()
-    assert (module_dir / "repository.py").exists()
-    assert (module_dir / "service.py").exists()
-    assert (module_dir / "controller.py").exists()
-    assert (module_dir / "routes.py").exists()
+    assert (module_dir / "models" / "__init__.py").exists()
+    assert (module_dir / "models" / "orders.py").exists()
+    assert (module_dir / "schemas" / "__init__.py").exists()
+    assert (module_dir / "schemas" / "orders_create_request.py").exists()
+    assert (module_dir / "schemas" / "orders_update_request.py").exists()
+    assert (module_dir / "schemas" / "orders_response.py").exists()
+    assert (module_dir / "repositories" / "__init__.py").exists()
+    assert (module_dir / "repositories" / "orders_repository.py").exists()
+    assert (module_dir / "services" / "__init__.py").exists()
+    assert (module_dir / "services" / "orders_service.py").exists()
+    assert (module_dir / "controllers" / "__init__.py").exists()
+    assert (module_dir / "controllers" / "orders_controller.py").exists()
+    assert (module_dir / "routes" / "__init__.py").exists()
+    assert (module_dir / "routes" / "orders_routes.py").exists()
+    assert (module_dir / "observers" / "__init__.py").exists()
+    assert (module_dir / "observers" / "orders_observer.py").exists()

@@ -360,66 +360,80 @@ Em producao, o core bloqueia configuracoes perigosas como `APP_DEBUG=true`, `CRE
 ### Criar modulo completo
 
 ```bash
-python console/manager.py make:module pix
-python console/manager.py make:module pix -a
+python console/manager.py make:module web/user -a
 ```
 
 Isso cria:
 
 ```text
-app/modules/pix/__init__.py
-app/modules/pix/models.py
-app/modules/pix/schemas.py
-app/modules/pix/repository.py
-app/modules/pix/service.py
-app/modules/pix/controller.py
-app/modules/pix/routes.py
+app/modules/web/user/__init__.py
+app/modules/web/user/models/__init__.py
+app/modules/web/user/models/user.py
+app/modules/web/user/schemas/__init__.py
+app/modules/web/user/schemas/user_create_request.py
+app/modules/web/user/schemas/user_update_request.py
+app/modules/web/user/schemas/user_response.py
+app/modules/web/user/repositories/__init__.py
+app/modules/web/user/repositories/user_repository.py
+app/modules/web/user/services/__init__.py
+app/modules/web/user/services/user_service.py
+app/modules/web/user/controllers/__init__.py
+app/modules/web/user/controllers/user_controller.py
+app/modules/web/user/routes/__init__.py
+app/modules/web/user/routes/user_routes.py
+app/modules/web/user/observers/__init__.py
+app/modules/web/user/observers/user_observer.py
 ```
 
 ### Criar apenas partes do modulo
 
 ```bash
-python console/manager.py make:controller user
-python console/manager.py make:service user
-python console/manager.py make:schema user
-python console/manager.py make:repository user
-python console/manager.py make:model user
-python console/manager.py make:model user -m
-python console/manager.py make:model user -c
-python console/manager.py make:model user -s
-python console/manager.py make:model user -sc
-python console/manager.py make:model user -r
-python console/manager.py make:model user -cr
-python console/manager.py make:model user --all
-python console/manager.py make:controller user -a
-python console/manager.py make:service user -a
-python console/manager.py make:schema user -a
-python console/manager.py make:repository user -a
+python console/manager.py make:controller Web/User
+python console/manager.py make:controller web/user
+python console/manager.py make:service web/user
+python console/manager.py make:schema web/user
+python console/manager.py make:repository web/user
+python console/manager.py make:model web/user
+python console/manager.py make:model web/user -m
+python console/manager.py make:model web/user -c
+python console/manager.py make:model web/user -s
+python console/manager.py make:model web/user -sc
+python console/manager.py make:model web/user -r
+python console/manager.py make:model web/user -cr
+python console/manager.py make:model web/user -a
+python console/manager.py make:controller web/user -a
+python console/manager.py make:service web/user -a
+python console/manager.py make:schema web/user -a
+python console/manager.py make:repository web/user -a
 ```
 
 ### Alias global
 
 ```bash
-python console/manager.py create:model user -a
+python console/manager.py create:model web/user -a
 ```
 
 ### Flags suportadas
 
 - `--all`
 - `-a` atalho para `--all`
-- `--m` ou `--model`
-- `--c` ou `--controller`
-- `--s` ou `--service`
-- `--sc` ou `--schema`
-- `--r` ou `--repository`
+- `-m` ou `--m` ou `--model`
+- `-c` ou `--c` ou `--controller`
+- `-s` ou `--s` ou `--service`
+- `-sc` ou `--sc` ou `--schema`
+- `-r` ou `--r` ou `--repository`
+- `-o` ou `--o` ou `--observer`
 - flags curtas podem ser agrupadas, por exemplo `-cr` ou `-mcr`
+- o caminho pode ter subpastas, por exemplo `web/user`
+- `-sc` sozinho continua sendo o atalho de `schema`; para combinar outras flags curtas, use grupos como `-cr` ou `-mcr`
 
 Comportamento:
 
-- sem flags, `make:model` gera `models.py`
+- sem flags, `make:model` gera `models/<entidade>.py`
 - com flags, ele gera so os arquivos pedidos
 - com `--all`, ele gera o scaffold completo do modulo
 - os comandos `make:module`, `make:controller`, `make:service`, `make:schema` e `make:repository` tambem aceitam flags e `--all`
+- os comandos completos tambem criam `observers/` com um observer base por modulo
 
 ## Comandos Do Console
 
@@ -628,15 +642,19 @@ O `docker-compose.yml` inclui:
 Cada modulo segue a mesma convencao:
 
 ```text
-models.py
-schemas.py
-repository.py
-service.py
-controller.py
-routes.py
+models/<entidade>.py
+schemas/<entidade>_create_request.py
+schemas/<entidade>_update_request.py
+schemas/<entidade>_response.py
+repositories/<entidade>_repository.py
+services/<entidade>_service.py
+controllers/<entidade>_controller.py
+routes/<entidade>_routes.py
+observers/<entidade>_observer.py
 ```
 
-As rotas sao carregadas automaticamente quando o modulo exporta `router` em `routes.py`.
+As rotas sao carregadas automaticamente quando o modulo exporta `router` em `routes/<entidade>_routes.py`.
+Os arquivos concretos importam diretamente de `app.core.base`, entao nao existe mais `base.py` local em cada modulo.
 
 ## Criar Um Novo Projeto A Partir Do Core
 

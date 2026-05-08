@@ -7,8 +7,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.bootstrap.services import import_models
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
-from app.modules.admin.repository import AdminIdentityRepository
-from app.modules.admin.service import DEFAULT_ADMIN_PERMISSIONS
+from app.modules.admin.repositories import AdminIdentityRepository
+from app.modules.admin.services import DEFAULT_ADMIN_PERMISSIONS
 from app.modules.auth.models import User
 
 

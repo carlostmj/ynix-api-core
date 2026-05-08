@@ -212,7 +212,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
     def _is_ip_blocked(self, ip_address: str, request: Request) -> bool:
         db = None
         try:
-            from app.modules.admin.repository import IpRuleRepository
+            from app.modules.admin.repositories import IpRuleRepository
 
             db = SessionLocal()
             rule = IpRuleRepository(db).find_active_for_ip(ip_address)

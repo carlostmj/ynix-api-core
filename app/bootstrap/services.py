@@ -9,3 +9,9 @@ def import_models() -> None:
     from app.modules.auth import models as auth_models  # noqa: F401
     from app.modules.example import models as example_models  # noqa: F401
     from app.modules.logs import models as log_models  # noqa: F401
+
+
+def import_observers() -> tuple[str, ...]:
+    from app.core.observers import register_observers
+
+    return register_observers()
