@@ -1,0 +1,4 @@
+REQUEST_ID_HEADER = "X-Request-ID"
+API_KEY_HEADER = "X-API-Key"
+ADMIN_SECRET_HEADER = "X-Admin-Secret"
+
