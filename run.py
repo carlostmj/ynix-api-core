@@ -31,6 +31,7 @@ prepare_environment()
 
 from app.core.config import settings  # noqa: E402
 from app.core.logging import configure_logging, build_logging_config  # noqa: E402
+from console.commands.status import print_status  # noqa: E402
 
 
 def serve(args: argparse.Namespace) -> None:
@@ -149,17 +150,7 @@ def _stop_single_process(process: subprocess.Popen, logger: logging.Logger) -> N
 
 
 def status(_: argparse.Namespace) -> None:
-    print("YNIX FASTAPI CORE")
-    print("-----------------")
-    print(f"Ambiente: {settings.app_env}")
-    print("API padrao: http://127.0.0.1:8000")
-    print(f"Banco: {settings.db_connection} ({settings.db_database})")
-    print(f"Fila: {settings.queue_connection} | queue={settings.queue_name}")
-    print(f"Scheduler: {'ativo' if settings.scheduler_enabled else 'inativo'}")
-    print(f"Supervisor: {'ativo' if settings.supervisor_enabled else 'inativo'}")
-    print(f"Logs: {LOG_DIR}")
-    for name, path in LOG_FILES.items():
-        print(f" - {name}: {path}")
+    print_status()
 
 
 def build_parser() -> argparse.ArgumentParser:

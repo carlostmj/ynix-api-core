@@ -49,6 +49,8 @@ uvicorn app.main:app --reload
 ## Arquivos Principais
 
 - `run.py`: runner principal com `serve`, `worker`, `scheduler`, `all` e `status`
+- `console/manager.py`: entrada principal do console no estilo Artisan
+- `console/manage.py`: alias de compatibilidade para a entrada principal
 - `app/main.py`: ponto de entrada da aplicacao FastAPI
 - `app/bootstrap/app.py`: cria o app, registra middlewares, rotas e bootstrap do banco
 - `app/core/`: configuracao, banco, seguranca, respostas, excecoes, middleware e manutencao
@@ -355,8 +357,8 @@ Em desenvolvimento, `CREATE_TABLES_ON_STARTUP=true` permite iniciar sem migratio
 ### Criar modulo completo
 
 ```bash
-python console/manage.py make:module pix
-python console/manage.py make:module pix --all
+python console/manager.py make:module pix
+python console/manager.py make:module pix --all
 ```
 
 Isso cria:
@@ -374,27 +376,27 @@ app/modules/pix/routes.py
 ### Criar apenas partes do modulo
 
 ```bash
-python console/manage.py make:controller user
-python console/manage.py make:service user
-python console/manage.py make:schema user
-python console/manage.py make:repository user
-python console/manage.py make:model user
-python console/manage.py make:model user --m
-python console/manage.py make:model user --c
-python console/manage.py make:model user --s
-python console/manage.py make:model user --sc
-python console/manage.py make:model user --r
-python console/manage.py make:model user --all
-python console/manage.py make:controller user --all
-python console/manage.py make:service user --all
-python console/manage.py make:schema user --all
-python console/manage.py make:repository user --all
+python console/manager.py make:controller user
+python console/manager.py make:service user
+python console/manager.py make:schema user
+python console/manager.py make:repository user
+python console/manager.py make:model user
+python console/manager.py make:model user --m
+python console/manager.py make:model user --c
+python console/manager.py make:model user --s
+python console/manager.py make:model user --sc
+python console/manager.py make:model user --r
+python console/manager.py make:model user --all
+python console/manager.py make:controller user --all
+python console/manager.py make:service user --all
+python console/manager.py make:schema user --all
+python console/manager.py make:repository user --all
 ```
 
 ### Alias global
 
 ```bash
-python console/manage.py create:model user --all
+python console/manager.py create:model user --all
 ```
 
 ### Flags suportadas
@@ -416,9 +418,10 @@ Comportamento:
 ## Comandos Do Console
 
 ```bash
-python console/manage.py
-python console/manage.py create:admin
-python console/manage.py create:admin --name "Maria Admin" --email maria@example.com --password password123 --password-confirmation password123
+python console/manager.py
+python console/manager.py create:admin
+python console/manager.py create:admin --name "Maria Admin" --email maria@example.com --password password123 --password-confirmation password123
+python console/manager.py status
 ```
 
 `create:admin` suporta as flags `--name`, `--email`, `--password` e `--password-confirmation`.
@@ -433,6 +436,7 @@ python console/manage.py create:admin --name "Maria Admin" --email maria@example
 - `make:schema`
 - `make:repository`
 - `create:admin`
+- `status`
 
 ### Comandos reservados para evolucao
 
