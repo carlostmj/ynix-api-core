@@ -2,6 +2,7 @@ from pathlib import Path
 
 from console.commands.make_controller import make_controller
 from console.commands.make_model import make_model
+from console.commands.make_observer import make_observer
 from console.commands.make_module import make_module
 
 
@@ -101,3 +102,16 @@ def test_make_controller_with_all_creates_full_nested_scaffold(tmp_path, monkeyp
     assert (module_dir / "routes" / "orders_routes.py").exists()
     assert (module_dir / "observers" / "__init__.py").exists()
     assert (module_dir / "observers" / "orders_observer.py").exists()
+
+
+def test_make_observer_creates_observer_file(tmp_path, monkeypatch):
+    import console.commands.writer as writer
+
+    monkeypatch.setattr(writer, "ROOT", tmp_path)
+
+    make_observer(["billing/user"])
+
+    module_dir = _module_root(tmp_path, "billing", "user")
+    assert (module_dir / "__init__.py").exists()
+    assert (module_dir / "observers" / "__init__.py").exists()
+    assert (module_dir / "observers" / "user_observer.py").exists()

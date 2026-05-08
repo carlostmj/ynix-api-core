@@ -393,6 +393,8 @@ python console/manager.py make:controller web/user
 python console/manager.py make:service web/user
 python console/manager.py make:schema web/user
 python console/manager.py make:repository web/user
+python console/manager.py make:observer web/user
+python console/manager.py make:observer web/user --model User
 python console/manager.py make:model web/user
 python console/manager.py make:model web/user -m
 python console/manager.py make:model web/user -c
@@ -435,6 +437,63 @@ Comportamento:
 - os comandos `make:module`, `make:controller`, `make:service`, `make:schema` e `make:repository` tambem aceitam flags e `--all`
 - os comandos completos tambem criam `observers/` com um observer base por modulo
 
+## Observers
+
+O core carrega observers automaticamente no startup e registra os hooks no SQLAlchemy.
+
+### Como funciona
+
+- `app/core/observers.py` varre os pacotes em `app/modules/**/observers`
+- cada observer herda de `BaseObserver`
+- o decorator `@observer` registra a classe ao importar o modulo
+- os hooks suportados sao:
+  - `created`
+  - `updated`
+  - `deleted`
+
+### Estrutura
+
+```text
+app/modules/auth/observers/user_observer.py
+app/modules/api_keys/observers/api_key_observer.py
+app/modules/example/observers/example_record_observer.py
+app/modules/admin/observers/admin_catalog_observer.py
+```
+
+### Exemplo
+
+```python
+import logging
+
+from app.core.base import BaseObserver
+from app.core.observers import observer
+from app.modules.auth.models import User
+
+logger = logging.getLogger("ynix.observers.auth")
+
+
+@observer
+class UserObserver(BaseObserver):
+    model = User
+
+    def created(self, target: User, session=None) -> None:
+        logger.info("User created email=%s", target.email)
+```
+
+### Quando usar
+
+- registrar auditoria automatica
+- disparar eventos de seguranca
+- publicar jobs assincronos quando um model mudar
+- sincronizar dados entre modulos sem espalhar logica pelo service
+
+### Fluxo no startup
+
+1. `app/bootstrap/app.py` importa modelos
+2. o bootstrap chama `import_observers()`
+3. o registrador carrega os observers dos modulos
+4. os hooks passam a escutar os eventos do SQLAlchemy
+
 ## Comandos Do Console
 
 ```bash
@@ -457,6 +516,8 @@ python console/manager.py list
 - `create:model`
 - `make:schema`
 - `make:repository`
+- `make:observer`
+- `create:observer`
 - `create:admin`
 - `status`
 - `help`

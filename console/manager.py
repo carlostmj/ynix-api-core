@@ -15,6 +15,7 @@ from console.commands.create_admin import create_admin
 from console.commands.make_controller import make_controller
 from console.commands.make_model import make_model
 from console.commands.make_module import make_module
+from console.commands.make_observer import make_observer
 from console.commands.make_repository import make_repository
 from console.commands.make_schema import make_schema
 from console.commands.make_service import make_service
@@ -73,6 +74,20 @@ def build_kernel() -> ArtisanKernel:
         requires_name=True,
         accepts_flags=True,
         help="Cria o repository do modulo em repositories/",
+    )
+    kernel.register(
+        "make:observer",
+        make_observer,
+        requires_name=True,
+        accepts_flags=True,
+        help="Cria um observer do modulo em observers/",
+    )
+    kernel.register(
+        "create:observer",
+        make_observer,
+        requires_name=True,
+        accepts_flags=True,
+        help="Alias de make:observer",
     )
     kernel.register(
         "create:admin",
