@@ -356,6 +356,7 @@ Em desenvolvimento, `CREATE_TABLES_ON_STARTUP=true` permite iniciar sem migratio
 
 ```bash
 python console/manage.py make:module pix
+python console/manage.py make:module pix --all
 ```
 
 Isso cria:
@@ -373,6 +374,10 @@ app/modules/pix/routes.py
 ### Criar apenas partes do modulo
 
 ```bash
+python console/manage.py make:controller user
+python console/manage.py make:service user
+python console/manage.py make:schema user
+python console/manage.py make:repository user
 python console/manage.py make:model user
 python console/manage.py make:model user --m
 python console/manage.py make:model user --c
@@ -380,6 +385,10 @@ python console/manage.py make:model user --s
 python console/manage.py make:model user --sc
 python console/manage.py make:model user --r
 python console/manage.py make:model user --all
+python console/manage.py make:controller user --all
+python console/manage.py make:service user --all
+python console/manage.py make:schema user --all
+python console/manage.py make:repository user --all
 ```
 
 ### Alias global
@@ -390,18 +399,19 @@ python console/manage.py create:model user --all
 
 ### Flags suportadas
 
+- `--all`
 - `--m` ou `--model`
 - `--c` ou `--controller`
 - `--s` ou `--service`
 - `--sc` ou `--schema`
 - `--r` ou `--repository`
-- `--all`
 
 Comportamento:
 
 - sem flags, `make:model` gera `models.py`
 - com flags, ele gera so os arquivos pedidos
 - com `--all`, ele gera o scaffold completo do modulo
+- os comandos `make:module`, `make:controller`, `make:service`, `make:schema` e `make:repository` tambem aceitam flags e `--all`
 
 ## Comandos Do Console
 
@@ -410,6 +420,8 @@ python console/manage.py
 python console/manage.py create:admin
 python console/manage.py create:admin --name "Maria Admin" --email maria@example.com --password password123 --password-confirmation password123
 ```
+
+`create:admin` suporta as flags `--name`, `--email`, `--password` e `--password-confirmation`.
 
 ### Comandos disponiveis
 
@@ -671,4 +683,3 @@ curl -X POST http://localhost:8000/v1/admin/auth/login \
 - `ADMIN_SECRET` e opcional, mas quando configurado protege as rotas publicas de API Key
 - Em producao, `JWT_SECRET` precisa ter pelo menos 32 caracteres
 - Se um arquivo de rota exportar `router`, ele entra automaticamente em `/v1`
-

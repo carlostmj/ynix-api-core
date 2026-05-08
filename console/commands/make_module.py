@@ -1,21 +1,7 @@
-from console.commands.templates import (
-    CONTROLLER_TEMPLATE,
-    MODEL_TEMPLATE,
-    REPOSITORY_TEMPLATE,
-    ROUTES_TEMPLATE,
-    SCHEMA_TEMPLATE,
-    SERVICE_TEMPLATE,
-)
-from console.commands.writer import module_dir, write_file
+from console.commands.scaffold import emit_scaffold, parse_scaffold_args
 
 
-def make_module(name: str) -> None:
-    path, context = module_dir(name)
-    write_file(path / "__init__.py", "")
-    write_file(path / "models.py", MODEL_TEMPLATE.substitute(context))
-    write_file(path / "schemas.py", SCHEMA_TEMPLATE.substitute(context))
-    write_file(path / "repository.py", REPOSITORY_TEMPLATE.substitute(context))
-    write_file(path / "service.py", SERVICE_TEMPLATE.substitute(context))
-    write_file(path / "controller.py", CONTROLLER_TEMPLATE.substitute(context))
-    write_file(path / "routes.py", ROUTES_TEMPLATE.substitute(context))
+def make_module(args: list[str] | str) -> None:
+    options = parse_scaffold_args([args] if isinstance(args, str) else args, "python console/manage.py make:module")
+    emit_scaffold(options.name, options, ("model", "schema", "repository", "service", "controller", "routes"))
     print("Modulo criado. As rotas serao carregadas automaticamente se routes.py expor a variavel router.")

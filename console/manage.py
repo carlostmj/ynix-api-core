@@ -25,13 +25,13 @@ from console.kernel import CommandRegistry
 
 def build_registry() -> CommandRegistry:
     registry = CommandRegistry()
-    registry.register("make:module", lambda args: make_module(args[0]))
-    registry.register("make:controller", lambda args: make_controller(args[0]))
-    registry.register("make:service", lambda args: make_service(args[0]))
+    registry.register("make:module", make_module)
+    registry.register("make:controller", make_controller)
+    registry.register("make:service", make_service)
     registry.register("make:model", make_model)
     registry.register("create:model", make_model)
-    registry.register("make:schema", lambda args: make_schema(args[0]))
-    registry.register("make:repository", lambda args: make_repository(args[0]))
+    registry.register("make:schema", make_schema)
+    registry.register("make:repository", make_repository)
     registry.register("create:admin", create_admin)
 
     for command_name in [

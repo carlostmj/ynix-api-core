@@ -1,8 +1,6 @@
-from console.commands.templates import CONTROLLER_TEMPLATE
-from console.commands.writer import module_dir, write_file
+from console.commands.scaffold import emit_scaffold, parse_scaffold_args
 
 
-def make_controller(name: str) -> None:
-    path, context = module_dir(name)
-    write_file(path / "controller.py", CONTROLLER_TEMPLATE.substitute(context))
-
+def make_controller(args: list[str] | str) -> None:
+    options = parse_scaffold_args([args] if isinstance(args, str) else args, "python console/manage.py make:controller")
+    emit_scaffold(options.name, options, ("controller",))
