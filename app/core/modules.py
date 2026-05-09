@@ -11,7 +11,9 @@ def load_module_routes(router: APIRouter) -> None:
         module_name = module_info.name
         if module_name.startswith("_"):
             continue
-        if not (module_name.endswith(".routes") or module_name.endswith("_routes")):
+        if module_info.ispkg:
+            continue
+        if ".routes" not in module_name and "_routes" not in module_name:
             continue
 
         try:

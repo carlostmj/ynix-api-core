@@ -1,4 +1,2 @@
-from app.core.base import BaseSchema
-from .api_key_create_request import ApiKeyCreateRequest
-from .api_key_created_response import ApiKeyCreatedResponse
-from .api_key_response import ApiKeyResponse
+from app.modules.api_keys.requests import ApiKeyCreateRequest
+from app.modules.api_keys.responses import ApiKeyCreatedResponse, ApiKeyResponse

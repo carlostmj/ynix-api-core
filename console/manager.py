@@ -14,11 +14,14 @@ if not (ROOT / ".env").exists() and "DB_CONNECTION" not in os.environ:
 from console.commands.create_admin import create_admin
 from console.commands.make_controller import make_controller
 from console.commands.make_model import make_model
+from console.commands.make_migration import make_migration
 from console.commands.make_module import make_module
 from console.commands.make_observer import make_observer
+from console.commands.migrate import migrate
 from console.commands.make_repository import make_repository
 from console.commands.make_schema import make_schema
 from console.commands.make_service import make_service
+from console.commands.rollback_migration import rollback_migration
 from console.commands.not_implemented import not_implemented
 from console.commands.status import print_status
 from console.kernel import ArtisanKernel
@@ -55,6 +58,13 @@ def build_kernel() -> ArtisanKernel:
         help="Cria um scaffold parcial ou completo a partir de um model",
     )
     kernel.register(
+        "make:migration",
+        make_migration,
+        requires_name=True,
+        accepts_flags=True,
+        help="Cria uma migration no estilo Laravel dentro do modulo",
+    )
+    kernel.register(
         "create:model",
         make_model,
         requires_name=True,
@@ -66,7 +76,14 @@ def build_kernel() -> ArtisanKernel:
         make_schema,
         requires_name=True,
         accepts_flags=True,
-        help="Cria o schema do modulo em schemas/",
+        help="Cria requests e responses do modulo",
+    )
+    kernel.register(
+        "make:request",
+        make_schema,
+        requires_name=True,
+        accepts_flags=True,
+        help="Alias de make:schema",
     )
     kernel.register(
         "make:repository",
@@ -89,6 +106,8 @@ def build_kernel() -> ArtisanKernel:
         accepts_flags=True,
         help="Alias de make:observer",
     )
+    kernel.register("migrate", migrate, help="Aplica as migrations pendentes")
+    kernel.register("migrate:rollback", rollback_migration, help="Reverte a ultima batch de migrations")
     kernel.register(
         "create:admin",
         create_admin,

@@ -1,2 +1,2 @@
 from app.core.base import BaseService
-from .example_service import ExampleService
+from .ExampleService import ExampleService

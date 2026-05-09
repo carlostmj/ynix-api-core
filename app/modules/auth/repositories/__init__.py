@@ -1,2 +1,2 @@
 from app.core.base import BaseRepository
-from .user_repository import UserRepository
+from .UserRepository import UserRepository

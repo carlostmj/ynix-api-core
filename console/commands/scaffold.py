@@ -1,12 +1,15 @@
 import argparse
 from dataclasses import dataclass
+from datetime import datetime
 
 from console.commands.templates import (
     CONTROLLER_TEMPLATE,
+    MIGRATION_TEMPLATE,
     OBSERVER_TEMPLATE,
     MODEL_TEMPLATE,
     REPOSITORY_TEMPLATE,
     ROUTES_TEMPLATE,
+    migration_context,
     SCHEMA_CREATE_REQUEST_TEMPLATE,
     SCHEMA_RESPONSE_TEMPLATE,
     SCHEMA_UPDATE_REQUEST_TEMPLATE,
@@ -15,7 +18,7 @@ from console.commands.templates import (
 from console.commands.writer import module_dir, write_file
 
 PART_FLAG_ORDER = ("model", "schema", "repository", "service", "controller", "observer")
-PART_ORDER = ("model", "schema", "repository", "service", "controller", "routes", "observer")
+PART_ORDER = ("model", "schema", "repository", "service", "controller", "routes", "observer", "migrations")
 
 PART_TO_DIRECTORY = {
     "model": "models",
@@ -25,15 +28,16 @@ PART_TO_DIRECTORY = {
     "controller": "controllers",
     "routes": "routes",
     "observer": "observers",
+    "migrations": "migrations",
 }
 
 PART_TO_FILENAME = {
-    "model": "{entity_slug}.py",
-    "repository": "{entity_slug}_repository.py",
-    "service": "{entity_slug}_service.py",
-    "controller": "{entity_slug}_controller.py",
-    "routes": "{entity_slug}_routes.py",
-    "observer": "{entity_slug}_observer.py",
+    "model": "{model_file_name}",
+    "repository": "{repository_file_name}",
+    "service": "{service_file_name}",
+    "controller": "{controller_file_name}",
+    "routes": "{routes_file_name}",
+    "observer": "{observer_file_name}",
 }
 
 PART_TO_TEMPLATE = {
@@ -46,9 +50,9 @@ PART_TO_TEMPLATE = {
 }
 
 SCHEMA_FILE_SPECS = (
-    ("create_request", "{entity_slug}_create_request.py", SCHEMA_CREATE_REQUEST_TEMPLATE),
-    ("update_request", "{entity_slug}_update_request.py", SCHEMA_UPDATE_REQUEST_TEMPLATE),
-    ("response", "{entity_slug}_response.py", SCHEMA_RESPONSE_TEMPLATE),
+    ("requests", "{schema_prefix}CreateRequest.py", SCHEMA_CREATE_REQUEST_TEMPLATE),
+    ("requests", "{schema_prefix}UpdateRequest.py", SCHEMA_UPDATE_REQUEST_TEMPLATE),
+    ("responses", "{schema_prefix}Response.py", SCHEMA_RESPONSE_TEMPLATE),
 )
 
 SHORT_FLAG_MAP = {
@@ -128,12 +132,37 @@ def emit_scaffold(name: str, options: ScaffoldOptions, default_parts: tuple[str,
 
     parts = resolve_parts(options, default_parts)
     for part in parts:
-        package_dir = path / PART_TO_DIRECTORY[part]
-        write_file(package_dir / "__init__.py", "")
-        if part == "schema":
-            for _, filename_template, template in SCHEMA_FILE_SPECS:
-                write_file(package_dir / filename_template.format(**context), template.substitute(context))
+        if part == "migrations":
+            package_dir = path / PART_TO_DIRECTORY[part]
+            write_file(package_dir / "__init__.py", "")
+            if "model" in parts:
+                migration_data = migration_context(context["module_path"])
+                timestamp = datetime.now().strftime("%Y_%m_%d_%H%M%S")
+                migration_data["migration_file_name"] = f"{timestamp}_{migration_data['migration_slug']}.py"
+                migration_data["migration_revision"] = f"{timestamp}_{migration_data['migration_slug']}"
+                write_file(
+                    package_dir / migration_data["migration_file_name"],
+                    MIGRATION_TEMPLATE.substitute(migration_data),
+                )
             continue
+        if part == "observer":
+            package_dir = path / PART_TO_DIRECTORY[part]
+            write_file(package_dir / "__init__.py", "")
+            filename = PART_TO_FILENAME[part].format(**context)
+            template = PART_TO_TEMPLATE[part]
+            write_file(package_dir / filename, template.substitute(context))
+            continue
+        if part == "schema":
+            request_dir = path / "requests"
+            response_dir = path / "responses"
+            write_file(request_dir / "__init__.py", request_package_init(context))
+            write_file(response_dir / "__init__.py", response_package_init(context))
+            for group, filename_template, template in SCHEMA_FILE_SPECS:
+                target_dir = request_dir if group == "requests" else response_dir
+                write_file(target_dir / filename_template.format(**context), template.substitute(context))
+            continue
+        package_dir = path / PART_TO_DIRECTORY[part]
+        write_file(package_dir / "__init__.py", package_init_content(part, context))
         filename = PART_TO_FILENAME[part].format(**context)
         template = PART_TO_TEMPLATE[part]
         write_file(package_dir / filename, template.substitute(context))
@@ -148,3 +177,32 @@ def resolve_parts(options: ScaffoldOptions, default_parts: tuple[str, ...]) -> t
         return tuple(selected)
 
     return default_parts
+
+
+def package_init_content(part: str, context: dict[str, str]) -> str:
+    match part:
+        case "model":
+            return f"from .{context['model_class_name']} import {context['model_class_name']}\n"
+        case "repository":
+            return f"from .{context['repository_class_name']} import {context['repository_class_name']}\n"
+        case "service":
+            return f"from .{context['service_class_name']} import {context['service_class_name']}\n"
+        case "controller":
+            return f"from .{context['controller_class_name']} import {context['controller_class_name']}\n"
+        case "routes":
+            return f"from .{context['routes_file_name'][:-3]} import router\n"
+        case "observer":
+            return f"from .{context['observer_class_name']} import {context['observer_class_name']}\n"
+        case _:
+            return ""
+
+
+def request_package_init(context: dict[str, str]) -> str:
+    return (
+        f"from .{context['schema_prefix']}CreateRequest import {context['schema_prefix']}CreateRequest\n"
+        f"from .{context['schema_prefix']}UpdateRequest import {context['schema_prefix']}UpdateRequest\n"
+    )
+
+
+def response_package_init(context: dict[str, str]) -> str:
+    return f"from .{context['schema_prefix']}Response import {context['schema_prefix']}Response\n"

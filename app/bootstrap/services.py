@@ -1,3 +1,6 @@
+from app.core.database import engine
+
+
 def register_services() -> None:
     """Reserved for future service container bindings."""
 
@@ -15,3 +18,9 @@ def import_observers() -> tuple[str, ...]:
     from app.core.observers import register_observers
 
     return register_observers()
+
+
+def prepare_models() -> None:
+    from app.core.base import BaseModel
+
+    BaseModel.prepare(bind=engine)
