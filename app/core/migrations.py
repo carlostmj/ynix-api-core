@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import importlib.util
-import inspect
 from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
@@ -67,11 +66,6 @@ def _migration_handler(module: ModuleType, method: str, db: Session) -> Any | No
         handler = getattr(migration, method, None)
         if callable(handler):
             return handler
-
-    legacy_name = "upgrade" if method == "up" else "downgrade"
-    legacy_handler = getattr(module, legacy_name, None)
-    if callable(legacy_handler):
-        return legacy_handler
     return None
 
 
@@ -99,10 +93,7 @@ def apply_migrations(db: Session) -> list[str]:
         upgrade = _migration_handler(module, "up", db)
         if upgrade is None:
             continue
-        if inspect.signature(upgrade).parameters:
-            upgrade(db)
-        else:
-            upgrade()
+        upgrade()
         db.execute(
             text(
                 f"""
@@ -147,10 +138,7 @@ def rollback_last_batch(db: Session) -> list[str]:
         downgrade = _migration_handler(module, "down", db)
         if downgrade is None:
             continue
-        if inspect.signature(downgrade).parameters:
-            downgrade(db)
-        else:
-            downgrade()
+        downgrade()
         db.execute(text(f"DELETE FROM {MIGRATIONS_TABLE} WHERE migration = :migration"), {"migration": migration_key})
         db.commit()
         rollbacks.append(migration_key)
