@@ -1,5 +1,4 @@
 from fastapi import Request
-from sqlalchemy.orm import Session
 
 from app.core.base import BaseController
 from app.modules.admin.repositories import AdminIdentityRepository
@@ -10,9 +9,6 @@ from app.modules.admin.services.Support import audit_from_request
 
 
 class AdminUsersController(BaseController):
-    def __init__(self, db: Session) -> None:
-        self.db = db
-
     def create_user(self, payload: AdminCreateUserRequest, request: Request, admin_user):
         user = AdminIdentityService(AdminIdentityRepository(self.db)).create(payload)
         audit_from_request(self.db, request, admin_user.id, "admin.users.create", "User", str(user.id), {"email": user.email})

@@ -1,5 +1,4 @@
 from fastapi import Request
-from sqlalchemy.orm import Session
 
 from app.core.base import BaseController
 from app.modules.admin.repositories import AdminRoleRepository
@@ -8,9 +7,6 @@ from app.modules.admin.services.Support import audit_from_request, create_role, 
 
 
 class AdminRolesController(BaseController):
-    def __init__(self, db: Session) -> None:
-        self.db = db
-
     def create_role(self, payload: RoleRequest, request: Request, admin_user):
         role = AdminRoleRepository(self.db).create(create_role(payload))
         audit_from_request(self.db, request, admin_user.id, "admin.roles.create", "AdminRole", str(role.id), {"name": role.name})

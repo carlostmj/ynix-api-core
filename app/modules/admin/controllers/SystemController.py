@@ -2,22 +2,18 @@ import os
 import time
 
 from fastapi import Request
-from sqlalchemy import func, text
-from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 from app.core.base import BaseController
 from app.core.config import settings
 from app.core.maintenance import get_maintenance_state, set_maintenance_mode
-from app.modules.admin.models import ErrorLog, SecurityEvent
+from app.modules.admin.repositories import ErrorLogRepository, SecurityEventRepository
 from app.modules.admin.services.Support import STARTED_AT, audit_from_request, maintenance_data
-from app.modules.logs.models import RequestLog
+from app.modules.logs.repositories import RequestLogRepository
 from app.modules.admin.requests import MaintenanceModeRequest
 
 
 class AdminSystemController(BaseController):
-    def __init__(self, db: Session) -> None:
-        self.db = db
-
     def health(self):
         database = "ok"
         try:
@@ -33,11 +29,14 @@ class AdminSystemController(BaseController):
             process_memory = os.getpid()
         except Exception:
             pass
+        request_repo = RequestLogRepository(self.db)
+        error_repo = ErrorLogRepository(self.db)
+        security_repo = SecurityEventRepository(self.db)
         data = {
             "uptime_seconds": round(time.time() - STARTED_AT, 2),
-            "requests": self.db.query(func.count(RequestLog.id)).scalar() or 0,
-            "errors": self.db.query(func.count(ErrorLog.id)).scalar() or 0,
-            "security_events": self.db.query(func.count(SecurityEvent.id)).scalar() or 0,
+            "requests": request_repo.count(),
+            "errors": error_repo.count(),
+            "security_events": security_repo.count(),
             "rate_limit_enabled": settings.rate_limit_enabled,
             "maintenance": get_maintenance_state().enabled,
             "process_id": process_memory,

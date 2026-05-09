@@ -1,13 +1,11 @@
 from datetime import UTC, datetime
 
-from sqlalchemy.orm import Session
-
 from app.core.base import BaseModel
 
 
 class ApiKey(BaseModel):
     table = "api_keys"
-    fillable = (
+    fillable = {
         "name",
         "key_hash",
         "prefix",
@@ -18,7 +16,7 @@ class ApiKey(BaseModel):
         "created_by",
         "expires_at",
         "last_used_at",
-    )
+    }
     protected = {
         "key_hash",
     }
@@ -41,7 +39,6 @@ class ApiKey(BaseModel):
             expires_at = expires_at.replace(tzinfo=UTC)
         return expires_at < datetime.now(UTC)
 
-    def touch(self, db: Session) -> None:
+    def touch(self) -> "ApiKey":
         self.last_used_at = datetime.now(UTC)
-        db.add(self)
-        db.commit()
+        return self

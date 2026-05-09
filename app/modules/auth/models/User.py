@@ -5,7 +5,7 @@ from app.core.base import BaseModel
 
 class User(BaseModel):
     table = "users"
-    fillable = (
+    fillable = {
         "name",
         "email",
         "password_hash",
@@ -16,7 +16,7 @@ class User(BaseModel):
         "is_super_admin",
         "is_active",
         "last_login_at",
-    )
+    }
     protected = {
         "password_hash",
     }

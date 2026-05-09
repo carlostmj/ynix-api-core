@@ -89,10 +89,9 @@ from app.core.base import BaseModel
 
 class ${model_class_name}(BaseModel):
     table = "${table_name}"
-    fillable = (
+    fillable = {
         "name",
-    )
-    protected = set()
+    }
     casts = {}
 
     name: Mapped[str] = mapped_column(String(120), index=True)
@@ -191,9 +190,7 @@ class ${service_class_name}(BaseService[${model_class_name}]):
 )
 
 CONTROLLER_TEMPLATE = Template(
-    """from sqlalchemy.orm import Session
-
-from app.core.base import BaseController
+    """from app.core.base import BaseController
 from app.modules.${module_namespace}.repositories.${repository_class_name} import ${repository_class_name}
 from app.modules.${module_namespace}.requests.${schema_prefix}CreateRequest import ${schema_prefix}CreateRequest
 from app.modules.${module_namespace}.responses.${schema_prefix}Response import ${schema_prefix}Response
@@ -202,36 +199,34 @@ from app.modules.${module_namespace}.services.${service_class_name} import ${ser
 
 
 class ${controller_class_name}(BaseController):
-    def __init__(self, db: Session) -> None:
-        self.service = ${service_class_name}(${repository_class_name}(db))
-
     def create(self, payload: ${schema_prefix}CreateRequest):
-        model = self.service.create(payload)
+        model = ${service_class_name}(${repository_class_name}(self.db)).create(payload)
         data = ${schema_prefix}Response.model_validate(model).model_dump()
         return self.success("${tag} criado com sucesso", data, 201)
 
     def show(self, model_id: int):
-        model = self.service.find_or_fail(model_id)
+        service = ${service_class_name}(${repository_class_name}(self.db))
+        model = service.find_or_fail(model_id)
         data = ${schema_prefix}Response.model_validate(model).model_dump()
         return self.success("${tag} encontrado com sucesso", data)
 
     def update(self, model_id: int, payload: ${schema_prefix}UpdateRequest):
-        model = self.service.update(model_id, payload)
+        service = ${service_class_name}(${repository_class_name}(self.db))
+        model = service.update(model_id, payload)
         data = ${schema_prefix}Response.model_validate(model).model_dump()
         return self.success("${tag} atualizado com sucesso", data)
 
     def delete(self, model_id: int):
-        model = self.service.find_or_fail(model_id)
-        self.service.repository.delete(model)
+        service = ${service_class_name}(${repository_class_name}(self.db))
+        model = service.find_or_fail(model_id)
+        service.repository.delete(model)
         return self.success("${tag} removido com sucesso")
 """
 )
 
 ROUTES_TEMPLATE = Template(
     """from fastapi import Depends
-from sqlalchemy.orm import Session
 
-from app.core.database import get_db
 from app.core.base import create_router
 from app.modules.${module_namespace}.controllers.${controller_class_name} import ${controller_class_name}
 from app.modules.${module_namespace}.requests.${schema_prefix}CreateRequest import ${schema_prefix}CreateRequest
@@ -242,23 +237,23 @@ router = create_router(prefix="/${route_prefix}", tags=["${tag}"])
 
 
 @router.post("", dependencies=[Depends(require_scopes(["${route_prefix}.create"]))])
-def create(payload: ${schema_prefix}CreateRequest, db: Session = Depends(get_db)):
-    return ${controller_class_name}(db).create(payload)
+def create(payload: ${schema_prefix}CreateRequest, controller: ${controller_class_name} = Depends(${controller_class_name})):
+    return controller.create(payload)
 
 
 @router.get("/{model_id}", dependencies=[Depends(require_scopes(["${route_prefix}.read"]))])
-def show(model_id: int, db: Session = Depends(get_db)):
-    return ${controller_class_name}(db).show(model_id)
+def show(model_id: int, controller: ${controller_class_name} = Depends(${controller_class_name})):
+    return controller.show(model_id)
 
 
 @router.put("/{model_id}", dependencies=[Depends(require_scopes(["${route_prefix}.update"]))])
-def update(model_id: int, payload: ${schema_prefix}UpdateRequest, db: Session = Depends(get_db)):
-    return ${controller_class_name}(db).update(model_id, payload)
+def update(model_id: int, payload: ${schema_prefix}UpdateRequest, controller: ${controller_class_name} = Depends(${controller_class_name})):
+    return controller.update(model_id, payload)
 
 
 @router.delete("/{model_id}", dependencies=[Depends(require_scopes(["${route_prefix}.delete"]))])
-def delete(model_id: int, db: Session = Depends(get_db)):
-    return ${controller_class_name}(db).delete(model_id)
+def delete(model_id: int, controller: ${controller_class_name} = Depends(${controller_class_name})):
+    return controller.delete(model_id)
 """
 )
 

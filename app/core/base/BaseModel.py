@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from datetime import UTC, datetime
 from typing import Any, ClassVar
 from uuid import uuid4
@@ -16,7 +16,7 @@ class BaseModel(DeferredReflection, Base):
     __abstract__ = True
 
     table: ClassVar[str | None] = None
-    fillable: ClassVar[tuple[str, ...]] = ()
+    fillable: ClassVar[Collection[str]] = ()
     protected: ClassVar[set[str]] = set()
     casts: ClassVar[dict[str, type | Callable[[Any], Any]]] = {}
 

@@ -1,5 +1,4 @@
 from fastapi import Request
-from sqlalchemy.orm import Session
 
 from app.core.base import BaseController
 from app.modules.admin.repositories import AdminPermissionRepository
@@ -8,9 +7,6 @@ from app.modules.admin.services.Support import audit_from_request, create_permis
 
 
 class AdminPermissionsController(BaseController):
-    def __init__(self, db: Session) -> None:
-        self.db = db
-
     def create_permission(self, payload: PermissionRequest, request: Request, admin_user):
         permission = AdminPermissionRepository(self.db).create(create_permission(payload))
         audit_from_request(

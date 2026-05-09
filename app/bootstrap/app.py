@@ -62,7 +62,7 @@ def create_app() -> FastAPI:
 
 def _bootstrap_admin_user() -> None:
     from app.core.database import SessionLocal
-    from app.modules.admin.services import bootstrap_admin_user
+    from app.core.base.BaseSupport import bootstrap_admin_user
 
     db = SessionLocal()
     try:

@@ -1,19 +1,14 @@
 from fastapi import Request
-from sqlalchemy.orm import Session
 
 from app.core.base import BaseController
-from app.modules.admin.models import ErrorLog, SecurityEvent
-from app.modules.admin.repositories import ErrorLogRepository, IpRuleRepository, SecurityEventRepository
+from app.modules.admin.repositories import IpRuleRepository, SecurityEventRepository
 from app.modules.admin.requests import IpRuleRequest
 from app.modules.admin.services.Support import audit_from_request, create_ip_rule, model_data
 
 
 class AdminSecurityController(BaseController):
-    def __init__(self, db: Session) -> None:
-        self.db = db
-
     def list_security_events(self):
-        events = SecurityEventRepository(self.db).find_all()[:100]
+        events = SecurityEventRepository(self.db).find_all(limit=100)
         return self.success("Security events listados com sucesso", [model_data(event) for event in events])
 
     def create_ip_rule(self, payload: IpRuleRequest, request: Request, admin_user):

@@ -3,7 +3,7 @@ from app.core.base import BaseModel
 
 class AdminAuditLog(BaseModel):
     table = "admin_audit_logs"
-    fillable = (
+    fillable = {
         "admin_user_id",
         "action",
         "entity_type",
@@ -12,8 +12,7 @@ class AdminAuditLog(BaseModel):
         "new_data",
         "ip_address",
         "user_agent",
-    )
-    protected = set()
+    }
     casts = {
         "admin_user_id": int,
         "old_data": dict,

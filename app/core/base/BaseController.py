@@ -1,9 +1,16 @@
 from typing import Any
 
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
 from app.core.responses import error_response, paginated_response, success_response
 
 
 class BaseController:
+    def __init__(self, db: Session = Depends(get_db)) -> None:
+        self.db = db
+
     def success(self, message: str = "Operacao realizada com sucesso", data: Any = None, status_code: int = 200):
         return success_response(message, data, status_code)
 

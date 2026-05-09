@@ -3,7 +3,7 @@ from app.core.base import BaseModel
 
 class SecurityEvent(BaseModel):
     table = "security_events"
-    fillable = (
+    fillable = {
         "event_type",
         "severity",
         "ip_address",
@@ -12,8 +12,7 @@ class SecurityEvent(BaseModel):
         "admin_user_id",
         "description",
         "event_metadata",
-    )
-    protected = set()
+    }
     casts = {
         "api_key_id": int,
         "user_id": int,

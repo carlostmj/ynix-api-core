@@ -3,7 +3,7 @@ from app.core.base import BaseModel
 
 class RequestLog(BaseModel):
     table = "request_logs"
-    fillable = (
+    fillable = {
         "request_id",
         "method",
         "path",
@@ -22,8 +22,7 @@ class RequestLog(BaseModel):
         "request_headers",
         "request_body",
         "response_body",
-    )
-    protected = set()
+    }
     casts = {
         "status_code": int,
         "response_time_ms": float,

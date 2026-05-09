@@ -15,6 +15,21 @@ class BaseRepository(Generic[ModelT]):
     def __init__(self, db: Session) -> None:
         self.db = db
 
+    def query(self):
+        return self.db.query(self.model)
+
+    def scoped_query(self):
+        query = self.query()
+        if hasattr(self.model, "deleted_at"):
+            query = query.filter(self.model.deleted_at.is_(None))
+        return query
+
+    def save(self, model: ModelT) -> ModelT:
+        self.db.add(model)
+        self.db.commit()
+        self.db.refresh(model)
+        return model
+
     def _coerce_model(self, payload: ModelT | dict[str, Any]) -> ModelT:
         if isinstance(payload, self.model):
             return payload
@@ -34,19 +49,13 @@ class BaseRepository(Generic[ModelT]):
             model.created_at = now
         if hasattr(model, "updated_at"):
             model.updated_at = now
-        self.db.add(model)
-        self.db.commit()
-        self.db.refresh(model)
-        return model
+        return self.save(model)
 
     def update(self, model: ModelT, data: dict[str, Any]) -> ModelT:
         model.fill(data)
         if hasattr(model, "updated_at"):
             model.updated_at = datetime.now(UTC)
-        self.db.add(model)
-        self.db.commit()
-        self.db.refresh(model)
-        return model
+        return self.save(model)
 
     def delete(self, model: ModelT) -> None:
         if hasattr(model, "deleted_at"):
@@ -57,21 +66,19 @@ class BaseRepository(Generic[ModelT]):
         self.db.commit()
 
     def find_by_id(self, model_id: int) -> ModelT | None:
-        query = self.db.query(self.model).filter(self.model.id == model_id)
-        if hasattr(self.model, "deleted_at"):
-            query = query.filter(self.model.deleted_at.is_(None))
-        return query.first()
+        return self.scoped_query().filter(self.model.id == model_id).first()
 
-    def find_all(self) -> list[ModelT]:
-        query = self.db.query(self.model)
-        if hasattr(self.model, "deleted_at"):
-            query = query.filter(self.model.deleted_at.is_(None))
-        return query.order_by(self.model.id.desc()).all()
+    def find_all(self, limit: int | None = None) -> list[ModelT]:
+        query = self.scoped_query().order_by(self.model.id.desc())
+        if limit is not None:
+            query = query.limit(limit)
+        return query.all()
+
+    def count(self) -> int:
+        return int(self.scoped_query().count())
 
     def paginate(self, page: int = 1, per_page: int = 15) -> tuple[list[ModelT], int]:
-        query = self.db.query(self.model)
-        if hasattr(self.model, "deleted_at"):
-            query = query.filter(self.model.deleted_at.is_(None))
+        query = self.scoped_query()
         total = query.count()
         items = query.order_by(self.model.id.desc()).offset((page - 1) * per_page).limit(per_page).all()
         return items, total

@@ -1,11 +1,9 @@
 from typing import Annotated
 
 from fastapi import Depends, Header
-from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.constants import ADMIN_SECRET_HEADER
-from app.core.database import get_db
 from app.core.exceptions import PermissionDeniedError
 from app.core.base import create_router
 from app.modules.api_keys.controllers import ApiKeyController
@@ -24,17 +22,17 @@ def require_admin_secret(x_admin_secret: Annotated[str | None, Header(alias=ADMI
 def create_api_key(
     payload: ApiKeyCreateRequest,
     _: None = Depends(require_admin_secret),
-    db: Session = Depends(get_db),
+    controller: ApiKeyController = Depends(ApiKeyController),
 ):
-    return ApiKeyController(db).create(payload)
+    return controller.create(payload)
 
 
 @router.get("")
 def list_api_keys(
     _: None = Depends(require_admin_secret),
-    db: Session = Depends(get_db),
+    controller: ApiKeyController = Depends(ApiKeyController),
 ):
-    return ApiKeyController(db).list()
+    return controller.list()
 
 
 @router.get("/me")

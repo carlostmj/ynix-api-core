@@ -3,7 +3,7 @@ from app.core.base import BaseModel
 
 class ErrorLog(BaseModel):
     table = "error_logs"
-    fillable = (
+    fillable = {
         "request_id",
         "error_type",
         "error_message",
@@ -18,8 +18,7 @@ class ErrorLog(BaseModel):
         "user_id",
         "admin_user_id",
         "severity",
-    )
-    protected = set()
+    }
     casts = {
         "line": int,
         "api_key_id": int,
