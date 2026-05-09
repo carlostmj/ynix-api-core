@@ -61,15 +61,6 @@ def build_kernel() -> ArtisanKernel:
         help="Cria um scaffold parcial ou completo a partir de um model",
     )
     kernel.register(
-        "create:model",
-        make_model,
-        requires_name=True,
-        accepts_flags=True,
-        help="Alias de make:model",
-        visible=False,
-        alias_for="make:model",
-    )
-    kernel.register(
         "make:migration",
         make_migration,
         requires_name=True,
@@ -97,15 +88,6 @@ def build_kernel() -> ArtisanKernel:
         accepts_flags=True,
         help="Cria um observer do modulo em observers/",
     )
-    kernel.register(
-        "create:observer",
-        make_observer,
-        requires_name=True,
-        accepts_flags=True,
-        help="Alias de make:observer",
-        visible=False,
-        alias_for="make:observer",
-    )
     kernel.register("migrate", migrate, help="Aplica as migrations pendentes")
     kernel.register("migrate:rollback", rollback_migration, help="Reverte a ultima batch de migrations")
     kernel.register("migrate:reset", migrate_reset, help="Reverte todas as migrations aplicadas")
@@ -118,20 +100,12 @@ def build_kernel() -> ArtisanKernel:
         accepts_flags=True,
         help="Cria ou promove um usuario para administrador",
     )
-    kernel.register(
-        "create:admin",
-        create_admin,
-        accepts_flags=True,
-        help="Alias de make:admin",
-        visible=False,
-        alias_for="make:admin",
-    )
     kernel.register("status", lambda _: print_status(), help="Mostra o status do ambiente")
     kernel.register("list", lambda _: print(kernel.render_list()), help="Lista todos os comandos")
     kernel.register("help", lambda args: print(kernel.render_help(args[0] if args else None)), help="Mostra ajuda")
 
     for command_name in [
-        "create:api-key",
+        "make:api-key",
         "reset:admin-password",
         "block:ip",
         "unblock:ip",

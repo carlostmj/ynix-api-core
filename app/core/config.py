@@ -19,7 +19,7 @@ _bootstrap_default_environment()
 
 class Settings(BaseSettings):
     app_name: str = "Ynix FastAPI Core"
-    app_version: str = "0.1.0"
+    app_version: str = "1.0.0"
     app_env: str = "local"
     app_debug: bool = True
     app_url: str = "http://localhost:8000"

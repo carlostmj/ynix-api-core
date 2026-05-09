@@ -4,6 +4,8 @@ Base modular em Python com FastAPI para criar APIs independentes com rapidez, ma
 
 Este core foi desenhado para ser duplicado e virar a base de novos produtos da Ynix.
 
+Versao atual: `1.0.0`.
+
 ## O Que Este Core Entrega
 
 - API HTTP com FastAPI
@@ -486,13 +488,9 @@ app/modules/web/user/migrations/2026_05_08_123456_create_users_table.py
 
 Quando o `--model` e informado, a migration criada registra a classe de referencia no stub gerado, deixando o arquivo pronto para automatizacoes e padronizacao futura.
 
-### Compatibilidade com alias antigo
+### Padrao do console
 
-```bash
-python console/manager.py make:model web/user -a
-```
-
-O alias antigo `create:model` continua aceito, mas a forma padrao agora e `make:model`.
+Nao ha mais aliases `create:*` no console. O padrao oficial agora e `make:*` para os comandos de geracao.
 
 ### Flags suportadas
 
@@ -603,11 +601,9 @@ python console/manager.py list
 - `help`
 - `list`
 
-Os antigos `create:model`, `create:observer` e `create:admin` continuam aceitos como alias de compatibilidade, mas nao aparecem na listagem.
-
 ### Comandos reservados para evolucao
 
-- `create:api-key`
+- `make:api-key`
 - `reset:admin-password`
 - `block:ip`
 - `unblock:ip`
