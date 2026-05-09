@@ -53,7 +53,6 @@ uvicorn app.main:app --reload
 
 - `run.py`: runner principal com `serve`, `worker`, `scheduler`, `all` e `status`
 - `console/manager.py`: entrada principal do console no estilo Artisan
-- `console/manage.py`: alias de compatibilidade para a entrada principal
 - `app/main.py`: ponto de entrada da aplicacao FastAPI
 - `app/bootstrap/app.py`: cria o app, registra middlewares, rotas e bootstrap do banco
 - `app/core/`: configuracao, banco, seguranca, respostas, excecoes, middleware e manutencao
