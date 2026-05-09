@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
 from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
@@ -59,10 +60,10 @@ def _load_module(path: Path) -> ModuleType:
     return module
 
 
-def _migration_handler(module: ModuleType, method: str) -> Any | None:
+def _migration_handler(module: ModuleType, method: str, db: Session) -> Any | None:
     migration_cls = getattr(module, "Migration", None)
     if migration_cls is not None:
-        migration = migration_cls()
+        migration = migration_cls(db)
         handler = getattr(migration, method, None)
         if callable(handler):
             return handler
@@ -95,10 +96,13 @@ def apply_migrations(db: Session) -> list[str]:
     executed: list[str] = []
     for migration in pending:
         module = _load_module(migration.path)
-        upgrade = _migration_handler(module, "up")
+        upgrade = _migration_handler(module, "up", db)
         if upgrade is None:
             continue
-        upgrade(db)
+        if inspect.signature(upgrade).parameters:
+            upgrade(db)
+        else:
+            upgrade()
         db.execute(
             text(
                 f"""
@@ -140,10 +144,13 @@ def rollback_last_batch(db: Session) -> list[str]:
         if migration is None:
             continue
         module = _load_module(migration.path)
-        downgrade = _migration_handler(module, "down")
+        downgrade = _migration_handler(module, "down", db)
         if downgrade is None:
             continue
-        downgrade(db)
+        if inspect.signature(downgrade).parameters:
+            downgrade(db)
+        else:
+            downgrade()
         db.execute(text(f"DELETE FROM {MIGRATIONS_TABLE} WHERE migration = :migration"), {"migration": migration_key})
         db.commit()
         rollbacks.append(migration_key)

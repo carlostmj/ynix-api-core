@@ -19,9 +19,9 @@ def test_make_migration_creates_timestamped_file(tmp_path, monkeypatch):
     content = migration_files[0].read_text(encoding="utf-8")
     assert "from app.core.base import BaseMigration" in content
     assert "class Migration(BaseMigration):" in content
-    assert "def up(self, db: Session) -> None:" in content
+    assert "def up(self) -> None:" in content
     assert "self.create_table(" in content
-    assert "self.drop_table(db)" in content
+    assert "self.drop_table()" in content
 
 
 def test_module_migrations_apply_and_rollback(tmp_path, monkeypatch):
@@ -32,24 +32,19 @@ def test_module_migrations_apply_and_rollback(tmp_path, monkeypatch):
     (root / "app" / "modules" / "web" / "user" / "migrations" / "__init__.py").write_text("", encoding="utf-8")
     (migration_dir / "2026_01_01_000000_create_user_notes_table.py").write_text(
         """
-from sqlalchemy import Column, String
-from sqlalchemy.orm import Session
-
 from app.core.base import BaseMigration
 
 
 class Migration(BaseMigration):
     table_name = "user_notes"
 
-
-    def up(self, db: Session) -> None:
+    def up(self) -> None:
         self.create_table(
-            db,
-            Column("title", String(120), nullable=False),
+            self.string("title", 120, nullable=False),
         )
 
-    def down(self, db: Session) -> None:
-        self.drop_table(db)
+    def down(self) -> None:
+        self.drop_table()
 """.strip()
         + "\n",
         encoding="utf-8",

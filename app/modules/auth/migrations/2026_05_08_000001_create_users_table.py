@@ -1,26 +1,22 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, JSON, String, text
-from sqlalchemy.orm import Session
-
 from app.core.base import BaseMigration
 
 
 class Migration(BaseMigration):
     table_name = "users"
 
-    def up(self, db: Session) -> None:
+    def up(self) -> None:
         self.create_table(
-            db,
-            Column("name", String(120), nullable=False),
-            Column("email", String(255), unique=True, index=True, nullable=False),
-            Column("password_hash", String(255), nullable=False),
-            Column("roles", JSON, nullable=False, server_default=text("'[]'")),
-            Column("permissions", JSON, nullable=False, server_default=text("'[]'")),
-            Column("scopes", JSON, nullable=False, server_default=text("'[]'")),
-            Column("is_admin", Boolean, nullable=False, server_default=text("0")),
-            Column("is_super_admin", Boolean, nullable=False, server_default=text("0")),
-            Column("is_active", Boolean, nullable=False, server_default=text("1")),
-            Column("last_login_at", DateTime(timezone=True), nullable=True),
+            self.string("name", 120, nullable=False),
+            self.string("email", 255, unique=True, index=True, nullable=False),
+            self.string("password_hash", 255, nullable=False),
+            self.json("roles", nullable=False, server_default=self.raw_default("'[]'")),
+            self.json("permissions", nullable=False, server_default=self.raw_default("'[]'")),
+            self.json("scopes", nullable=False, server_default=self.raw_default("'[]'")),
+            self.boolean("is_admin", nullable=False, server_default=self.raw_default("0")),
+            self.boolean("is_super_admin", nullable=False, server_default=self.raw_default("0")),
+            self.boolean("is_active", nullable=False, server_default=self.raw_default("1")),
+            self.datetime("last_login_at", nullable=True),
         )
 
-    def down(self, db: Session) -> None:
-        self.drop_table(db)
+    def down(self) -> None:
+        self.drop_table()

@@ -1,24 +1,20 @@
-from sqlalchemy import Column, Integer, JSON, String, text
-from sqlalchemy.orm import Session
-
 from app.core.base import BaseMigration
 
 
 class Migration(BaseMigration):
     table_name = "security_events"
 
-    def up(self, db: Session) -> None:
+    def up(self) -> None:
         self.create_table(
-            db,
-            Column("event_type", String(120), index=True, nullable=False),
-            Column("severity", String(32), index=True, nullable=False, server_default=text("'warning'")),
-            Column("ip_address", String(64), nullable=True, index=True),
-            Column("api_key_id", Integer, nullable=True),
-            Column("user_id", Integer, nullable=True),
-            Column("admin_user_id", Integer, nullable=True),
-            Column("description", String(500), nullable=False),
-            Column("event_metadata", JSON, nullable=True),
+            self.string("event_type", 120, index=True, nullable=False),
+            self.string("severity", 32, index=True, nullable=False, server_default=self.raw_default("'warning'")),
+            self.string("ip_address", 64, nullable=True, index=True),
+            self.integer("api_key_id", nullable=True),
+            self.integer("user_id", nullable=True),
+            self.integer("admin_user_id", nullable=True),
+            self.string("description", 500, nullable=False),
+            self.json("event_metadata", nullable=True),
         )
 
-    def down(self, db: Session) -> None:
-        self.drop_table(db)
+    def down(self) -> None:
+        self.drop_table()

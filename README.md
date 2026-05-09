@@ -801,7 +801,7 @@ class User(BaseModel):
     }
 ```
 
-O `BaseRepository` usa `fillable` ao criar ou atualizar registros a partir de dicts, e `protected` esconde campos sensiveis em `to_dict()`. As migrations ficam separadas em `app/core/base` e nos modulos, com uma classe `Migration` por arquivo, usando `BaseMigration` para compartilhar as colunas base.
+O `BaseRepository` usa `fillable` ao criar ou atualizar registros a partir de dicts, e `protected` esconde campos sensiveis em `to_dict()`. As migrations ficam separadas em `app/core/base` e nos modulos, com uma classe `Migration` por arquivo, importando apenas `BaseMigration` e usando os helpers da base para declarar colunas, tipos e defaults.
 
 ## Criar Um Novo Projeto A Partir Do Core
 

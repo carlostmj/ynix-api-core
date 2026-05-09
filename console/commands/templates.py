@@ -268,22 +268,19 @@ ROUTES_BASE_TEMPLATE = Template(
 )
 
 MIGRATION_TEMPLATE = Template(
-    """from sqlalchemy import Column, Boolean, DateTime, Float, Integer, JSON, String, Text, text
-from sqlalchemy.orm import Session
+    """from app.core.base import BaseMigration
 
-from app.core.base import BaseMigration
 
 class Migration(BaseMigration):
     table_name = "${table_name}"
 
-    def up(self, db: Session) -> None:
+    def up(self) -> None:
         self.create_table(
-            db,
             # Adicione as colunas do modulo aqui.
         )
 
-    def down(self, db: Session) -> None:
-        self.drop_table(db)
+    def down(self) -> None:
+        self.drop_table()
 """
 )
 

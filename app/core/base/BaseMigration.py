@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from sqlalchemy import Column, DateTime, Integer, MetaData, String, Table, text
+from sqlalchemy import Boolean, Column, DateTime, Float, Integer, JSON, MetaData, String, Table, Text, text
 from sqlalchemy.orm import Session
 
 
 class BaseMigration:
     table_name: ClassVar[str | None] = None
+
+    def __init__(self, db: Session) -> None:
+        self.db = db
 
     @classmethod
     def get_table_name(cls) -> str:
@@ -16,23 +19,80 @@ class BaseMigration:
         raise ValueError(f"{cls.__name__} precisa definir table_name.")
 
     @classmethod
+    def raw_default(cls, expression: str):
+        return text(expression)
+
+    @classmethod
+    def current_timestamp_default(cls):
+        return text("CURRENT_TIMESTAMP")
+
+    @classmethod
+    def column(cls, name: str, type_: object, **kwargs) -> Column:
+        return Column(name, type_, **kwargs)
+
+    @classmethod
+    def id_column(cls) -> Column:
+        return Column("id", Integer, primary_key=True)
+
+    @classmethod
+    def uuid_column(cls) -> Column:
+        return Column("uuid", String(36), unique=True, index=True, nullable=False)
+
+    @classmethod
+    def created_at_column(cls) -> Column:
+        return Column("created_at", DateTime(timezone=True), nullable=False, server_default=cls.current_timestamp_default())
+
+    @classmethod
+    def updated_at_column(cls) -> Column:
+        return Column("updated_at", DateTime(timezone=True), nullable=False, server_default=cls.current_timestamp_default())
+
+    @classmethod
+    def deleted_at_column(cls) -> Column:
+        return Column("deleted_at", DateTime(timezone=True), nullable=True)
+
+    @classmethod
     def base_columns(cls) -> list[Column]:
         return [
-            Column("id", Integer, primary_key=True),
-            Column("uuid", String(36), unique=True, index=True, nullable=False),
-            Column("created_at", DateTime(timezone=True), nullable=False, server_default=text("CURRENT_TIMESTAMP")),
-            Column("updated_at", DateTime(timezone=True), nullable=False, server_default=text("CURRENT_TIMESTAMP")),
-            Column("deleted_at", DateTime(timezone=True), nullable=True),
+            cls.id_column(),
+            cls.uuid_column(),
+            cls.created_at_column(),
+            cls.updated_at_column(),
+            cls.deleted_at_column(),
         ]
 
-    @classmethod
-    def build_table(cls, *columns: Column) -> Table:
-        return Table(cls.get_table_name(), MetaData(), *cls.base_columns(), *columns)
+    def build_table(self, *columns: Column) -> Table:
+        return Table(self.get_table_name(), MetaData(), *self.base_columns(), *columns)
+
+    def create_table(self, *columns: Column) -> None:
+        self.build_table(*columns).create(bind=self.db.get_bind(), checkfirst=True)
+
+    def drop_table(self) -> None:
+        Table(self.get_table_name(), MetaData()).drop(bind=self.db.get_bind(), checkfirst=True)
 
     @classmethod
-    def create_table(cls, db: Session, *columns: Column) -> None:
-        cls.build_table(*columns).create(bind=db.get_bind(), checkfirst=True)
+    def string(cls, name: str, length: int = 255, **kwargs) -> Column:
+        return Column(name, String(length), **kwargs)
 
     @classmethod
-    def drop_table(cls, db: Session) -> None:
-        Table(cls.get_table_name(), MetaData()).drop(bind=db.get_bind(), checkfirst=True)
+    def text_column(cls, name: str, **kwargs) -> Column:
+        return Column(name, Text, **kwargs)
+
+    @classmethod
+    def integer(cls, name: str, **kwargs) -> Column:
+        return Column(name, Integer, **kwargs)
+
+    @classmethod
+    def float(cls, name: str, **kwargs) -> Column:
+        return Column(name, Float, **kwargs)
+
+    @classmethod
+    def boolean(cls, name: str, **kwargs) -> Column:
+        return Column(name, Boolean, **kwargs)
+
+    @classmethod
+    def json(cls, name: str, **kwargs) -> Column:
+        return Column(name, JSON, **kwargs)
+
+    @classmethod
+    def datetime(cls, name: str, **kwargs) -> Column:
+        return Column(name, DateTime(timezone=True), **kwargs)

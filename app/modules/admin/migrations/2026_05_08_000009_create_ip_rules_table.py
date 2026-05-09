@@ -1,22 +1,18 @@
-from sqlalchemy import Boolean, Column, DateTime, String, Text
-from sqlalchemy.orm import Session
-
 from app.core.base import BaseMigration
+
 
 class Migration(BaseMigration):
     table_name = "ip_rules"
 
-
-    def up(self, db: Session) -> None:
+    def up(self) -> None:
         self.create_table(
-            db,
-            Column("ip_address", String(64), index=True, nullable=False),
-            Column("type", String(16), index=True, nullable=False),
-            Column("reason", String(255), nullable=True),
-            Column("notes", Text, nullable=True),
-            Column("is_active", Boolean, nullable=False, server_default="1"),
-            Column("expires_at", DateTime(timezone=True), nullable=True),
+            self.string("ip_address", 64, index=True, nullable=False),
+            self.string("type", 16, index=True, nullable=False),
+            self.string("reason", 255, nullable=True),
+            self.text_column("notes", nullable=True),
+            self.boolean("is_active", nullable=False, server_default=self.raw_default("1")),
+            self.datetime("expires_at", nullable=True),
         )
 
-    def down(self, db: Session) -> None:
-        self.drop_table(db)
+    def down(self) -> None:
+        self.drop_table()
