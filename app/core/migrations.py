@@ -155,3 +155,53 @@ def rollback_last_batch(db: Session) -> list[str]:
         db.commit()
         rollbacks.append(migration_key)
     return rollbacks
+
+
+def rollback_all_migrations(db: Session) -> list[str]:
+    rolled_back: list[str] = []
+    while True:
+        batch = rollback_last_batch(db)
+        if not batch:
+            break
+        rolled_back.extend(batch)
+    return rolled_back
+
+
+def migration_status(db: Session) -> list[dict[str, Any]]:
+    ensure_migrations_table(db)
+    applied_rows = db.execute(
+        text(
+            f"""
+            SELECT migration, module, batch, applied_at
+            FROM {MIGRATIONS_TABLE}
+            ORDER BY id ASC
+            """
+        )
+    ).all()
+    applied_map = {
+        row[0]: {
+            "module": row[1],
+            "batch": row[2],
+            "applied_at": row[3],
+        }
+        for row in applied_rows
+    }
+
+    status: list[dict[str, Any]] = []
+    for migration in discover_migrations():
+        applied = applied_map.get(migration.key)
+        status.append(
+            {
+                "migration": migration.key,
+                "module": migration.module,
+                "applied": applied is not None,
+                "batch": applied["batch"] if applied else None,
+                "applied_at": applied["applied_at"] if applied else None,
+            }
+        )
+    return status
+
+
+def fresh_migrations(db: Session) -> list[str]:
+    rollback_all_migrations(db)
+    return apply_migrations(db)

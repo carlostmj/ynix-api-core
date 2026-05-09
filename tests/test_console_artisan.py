@@ -8,6 +8,8 @@ def test_console_list_shows_registered_commands(capsys):
     assert "Comandos disponiveis:" in output
     assert "make:model" in output
     assert "create:admin" in output
+    assert "migrate:status" in output
+    assert "migrate:fresh" in output
 
 
 def test_console_help_shows_command_details(capsys):
@@ -25,6 +27,14 @@ def test_console_status_is_available(capsys):
     output = capsys.readouterr().out
     assert "YNIX FASTAPI CORE" in output
     assert "Banco:" in output
+
+
+def test_console_migration_status_is_available(capsys):
+    main(["migrate:status"])
+
+    output = capsys.readouterr().out
+    assert "Migration status" in output
+    assert "pending" in output or "applied" in output
 
 
 def test_kernel_render_list_includes_help_text():

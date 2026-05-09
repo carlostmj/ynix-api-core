@@ -348,10 +348,12 @@ A URL SQLAlchemy e montada automaticamente:
 ```bash
 python console/manager.py make:migration auth create_users_table --model User
 python console/manager.py migrate
+python console/manager.py migrate:status
 python console/manager.py migrate:rollback
+python console/manager.py migrate:fresh
 ```
 
-Em desenvolvimento, `CREATE_TABLES_ON_STARTUP=true` permite iniciar sem migrations manuais. Em producao, prefira Alembic.
+Em desenvolvimento, `CREATE_TABLES_ON_STARTUP=true` permite iniciar sem migrations manuais. Em producao, prefira o fluxo de migrations do proprio core.
 
 Em producao, o core bloqueia configuracoes perigosas como `APP_DEBUG=true`, `CREATE_TABLES_ON_STARTUP=true`, `RATE_LIMIT_ENABLED=false`, `REQUEST_LOG_SAVE_BODY=true` e `CORS_ORIGINS=*`.
 
@@ -452,10 +454,23 @@ Aplicar migrations pendentes:
 python console/manager.py migrate
 ```
 
+Ver o status:
+
+```bash
+python console/manager.py migrate:status
+```
+
 Reverter a ultima batch:
 
 ```bash
 python console/manager.py migrate:rollback
+```
+
+Reiniciar e reaplicar tudo:
+
+```bash
+python console/manager.py migrate:fresh
+python console/manager.py migrate:refresh
 ```
 
 Exemplo de arquivo gerado:
@@ -464,7 +479,7 @@ Exemplo de arquivo gerado:
 app/modules/web/user/migrations/2026_05_08_123456_create_users_table.py
 ```
 
-Quando o `--model` e informado, a migration criada usa o `__table__` do model para criar e remover a tabela, o que deixa o fluxo bem direto para novos projetos.
+Quando o `--model` e informado, a migration criada usa o model como referencia para gerar a tabela e os campos base, o que deixa o fluxo bem direto para novos projetos.
 
 ### Alias global
 
