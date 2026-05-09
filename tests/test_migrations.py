@@ -1,8 +1,9 @@
 from pathlib import Path
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import String, create_engine, text
 from sqlalchemy.orm import sessionmaker
 
+from app.core.base import BaseMigration
 from app.core import migrations as migration_core
 from console.commands.make_migration import make_migration
 
@@ -19,6 +20,7 @@ def test_make_migration_creates_timestamped_file(tmp_path, monkeypatch):
     content = migration_files[0].read_text(encoding="utf-8")
     assert "from app.core.base import BaseMigration" in content
     assert "class Migration(BaseMigration):" in content
+    assert 'model_class_name = "User"' in content
     assert "def up(self) -> None:" in content
     assert "self.create_table(" in content
     assert "self.drop_table()" in content
@@ -111,3 +113,20 @@ class Migration(BaseMigration):
         assert status_after[0]["batch"] == 1
     finally:
         db.close()
+
+
+def test_base_migration_helpers_cover_indexes_and_foreign_keys():
+    indexed = BaseMigration.indexed("email", String(255), nullable=False)
+    unique = BaseMigration.unique("uuid", String(36), nullable=False)
+    foreign_id = BaseMigration.foreign_id("user_id", "users", nullable=False)
+    foreign_uuid = BaseMigration.foreign_uuid("owner_uuid", "users", nullable=False)
+    integer = BaseMigration.integer("age", nullable=False)
+
+    assert indexed.index is True
+    assert unique.unique is True
+    assert unique.index is True
+    assert foreign_id.index is True
+    assert foreign_id.foreign_keys
+    assert foreign_uuid.index is True
+    assert foreign_uuid.foreign_keys
+    assert integer.type.__class__.__name__ == "Integer"

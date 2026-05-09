@@ -1,4 +1,5 @@
 from console.manager import build_kernel, main
+from console.commands import migrate_reset as migrate_reset_command
 
 
 def test_console_list_shows_registered_commands(capsys):
@@ -9,6 +10,7 @@ def test_console_list_shows_registered_commands(capsys):
     assert "make:model" in output
     assert "create:admin" in output
     assert "migrate:status" in output
+    assert "migrate:reset" in output
     assert "migrate:fresh" in output
 
 
@@ -35,6 +37,22 @@ def test_console_migration_status_is_available(capsys):
     output = capsys.readouterr().out
     assert "Migration status" in output
     assert "pending" in output or "applied" in output
+
+
+def test_console_migrate_reset_prints_summary(monkeypatch, capsys):
+    class DummyDB:
+        def close(self):
+            return None
+
+    monkeypatch.setattr(migrate_reset_command, "SessionLocal", lambda: DummyDB())
+    monkeypatch.setattr(migrate_reset_command, "rollback_all_migrations", lambda db: ["one", "two"])
+
+    migrate_reset_command.migrate_reset([])
+
+    output = capsys.readouterr().out
+    assert "Migrations resetadas: 2" in output
+    assert "one" in output
+    assert "two" in output
 
 
 def test_kernel_render_list_includes_help_text():

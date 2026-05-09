@@ -439,7 +439,9 @@ As migrations seguem um padrao bem proximo do Laravel:
 
 - ficam dentro de `app/modules/<modulo>/migrations/`
 - usam nome com timestamp no arquivo
-- cada arquivo expoe `upgrade(db)` e `downgrade(db)`
+- cada arquivo expoe uma classe `Migration` com `up()` e `down()`
+- cada migration importa apenas `BaseMigration` do core
+- a base centraliza helpers como `string`, `integer`, `boolean`, `json`, `datetime`, `indexed`, `unique`, `foreign_id` e `foreign_uuid`
 - a aplicacao registra o que ja foi executado numa tabela `module_migrations`
 
 Criar uma migration:
@@ -466,6 +468,12 @@ Reverter a ultima batch:
 python console/manager.py migrate:rollback
 ```
 
+Resetar tudo:
+
+```bash
+python console/manager.py migrate:reset
+```
+
 Reiniciar e reaplicar tudo:
 
 ```bash
@@ -479,7 +487,7 @@ Exemplo de arquivo gerado:
 app/modules/web/user/migrations/2026_05_08_123456_create_users_table.py
 ```
 
-Quando o `--model` e informado, a migration criada usa o model como referencia para gerar a tabela e os campos base, o que deixa o fluxo bem direto para novos projetos.
+Quando o `--model` e informado, a migration criada registra a classe de referencia no stub gerado, deixando o arquivo pronto para automatizacoes e padronizacao futura.
 
 ### Alias global
 
@@ -510,6 +518,7 @@ Comportamento:
 - os comandos completos tambem criam `observers/` com um observer base por modulo
 - os comandos completos tambem criam `migrations/` como area reservada por modulo
 - quando o modulo inclui model, a scaffold completa tambem gera uma migration inicial no estilo Laravel
+- `migrate`, `migrate:rollback`, `migrate:reset`, `migrate:status`, `migrate:fresh` e `migrate:refresh` seguem o fluxo Artisan
 
 ## Observers
 
@@ -816,7 +825,7 @@ class User(BaseModel):
     }
 ```
 
-O `BaseRepository` usa `fillable` ao criar ou atualizar registros a partir de dicts, e `protected` esconde campos sensiveis em `to_dict()`. As migrations ficam separadas em `app/core/base` e nos modulos, com uma classe `Migration` por arquivo, importando apenas `BaseMigration` e usando os helpers da base para declarar colunas, tipos e defaults.
+O `BaseRepository` usa `fillable` ao criar ou atualizar registros a partir de dicts, e `protected` esconde campos sensiveis em `to_dict()`. As migrations ficam separadas em `app/core/base` e nos modulos, com uma classe `Migration` por arquivo, importando apenas `BaseMigration` e usando os helpers da base para declarar colunas, tipos, defaults, indices e chaves estrangeiras.
 
 ## Criar Um Novo Projeto A Partir Do Core
 

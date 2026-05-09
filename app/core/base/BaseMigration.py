@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from sqlalchemy import Boolean, Column, DateTime, Float, Integer, JSON, MetaData, String, Table, Text, text
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, JSON, MetaData, String, Table, Text, text
 from sqlalchemy.orm import Session
 
 
@@ -84,6 +84,22 @@ class BaseMigration:
     @classmethod
     def float(cls, name: str, **kwargs) -> Column:
         return Column(name, Float, **kwargs)
+
+    @classmethod
+    def indexed(cls, name: str, type_: object, **kwargs) -> Column:
+        return Column(name, type_, index=True, **kwargs)
+
+    @classmethod
+    def unique(cls, name: str, type_: object, **kwargs) -> Column:
+        return Column(name, type_, unique=True, index=True, **kwargs)
+
+    @classmethod
+    def foreign_id(cls, name: str, table_name: str, column_name: str = "id", **kwargs) -> Column:
+        return Column(name, Integer, ForeignKey(f"{table_name}.{column_name}"), index=True, **kwargs)
+
+    @classmethod
+    def foreign_uuid(cls, name: str, table_name: str, column_name: str = "uuid", **kwargs) -> Column:
+        return Column(name, String(36), ForeignKey(f"{table_name}.{column_name}"), index=True, **kwargs)
 
     @classmethod
     def boolean(cls, name: str, **kwargs) -> Column:

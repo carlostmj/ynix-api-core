@@ -273,6 +273,7 @@ MIGRATION_TEMPLATE = Template(
 
 class Migration(BaseMigration):
     table_name = "${table_name}"
+    model_class_name = "${migration_model_class_name}"
 
     def up(self) -> None:
         self.create_table(

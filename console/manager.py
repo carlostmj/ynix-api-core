@@ -23,6 +23,7 @@ from console.commands.migrate_status import migrate_status
 from console.commands.make_repository import make_repository
 from console.commands.make_schema import make_schema
 from console.commands.make_service import make_service
+from console.commands.migrate_reset import migrate_reset
 from console.commands.rollback_migration import rollback_migration
 from console.commands.not_implemented import not_implemented
 from console.commands.status import print_status
@@ -110,6 +111,7 @@ def build_kernel() -> ArtisanKernel:
     )
     kernel.register("migrate", migrate, help="Aplica as migrations pendentes")
     kernel.register("migrate:rollback", rollback_migration, help="Reverte a ultima batch de migrations")
+    kernel.register("migrate:reset", migrate_reset, help="Reverte todas as migrations aplicadas")
     kernel.register("migrate:status", migrate_status, help="Mostra o status das migrations")
     kernel.register("migrate:fresh", migrate_fresh, help="Reinicia todas as migrations e aplica novamente")
     kernel.register("migrate:refresh", migrate_fresh, help="Alias de migrate:fresh")
