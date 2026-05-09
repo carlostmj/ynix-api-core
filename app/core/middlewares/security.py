@@ -4,9 +4,9 @@ from fastapi import Request, status
 from starlette.responses import Response
 
 from app.core.audit import create_security_event
-from app.core.database import SessionLocal
 from app.core.responses import error_response
 from app.core.security import decode_access_token
+from app.core.base import session_scope
 from app.modules.admin.repositories import IpRuleRepository
 from app.modules.auth.repositories import UserRepository
 
@@ -64,41 +64,29 @@ def request_has_valid_admin_token(request: Request) -> bool:
     if user_id is None:
         return False
 
-    db = None
     try:
-        db = SessionLocal()
-        user = UserRepository(db).find_by_id(int(user_id))
-        return bool(user and user.is_admin and user.is_active)
+        with session_scope() as db:
+            user = UserRepository(db).find_by_id(int(user_id))
+            return bool(user and user.is_admin and user.is_active)
     except Exception:
         return False
-    finally:
-        if db:
-            db.close()
 
 
 def is_ip_blocked(ip_address: str, request: Request) -> bool:
-    db = None
     try:
-        db = SessionLocal()
-        rule = IpRuleRepository(db).find_active_for_ip(ip_address)
-        if rule and rule.type == "block":
-            create_security_event(db, "blocked_ip_access", "Acesso bloqueado por regra de IP", request, "warning")
-            return True
-        return False
+        with session_scope() as db:
+            rule = IpRuleRepository(db).find_active_for_ip(ip_address)
+            if rule and rule.type == "block":
+                create_security_event(db, "blocked_ip_access", "Acesso bloqueado por regra de IP", request, "warning")
+                return True
+            return False
     except Exception:
         return False
-    finally:
-        if db:
-            db.close()
 
 
 def record_security_event(event_type: str, description: str, request: Request) -> None:
-    db = None
     try:
-        db = SessionLocal()
-        create_security_event(db, event_type, description, request)
+        with session_scope() as db:
+            create_security_event(db, event_type, description, request)
     except Exception:
         pass
-    finally:
-        if db:
-            db.close()

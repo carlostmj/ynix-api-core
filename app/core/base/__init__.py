@@ -6,3 +6,4 @@ from .Router import create_router
 from .BaseSchema import BaseSchema
 from .BaseRepository import BaseRepository
 from .BaseService import BaseService
+from .BaseMiddlewareSupport import session_scope

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.core.config import settings
 from app.core.middlewares.context import RequestContextMiddleware
 from app.core.middlewares.rate_limit import RateLimitState, rate_limit_lock, rate_limit_store, rate_limit_store_ttl_seconds
