@@ -500,12 +500,12 @@ python console/manager.py create:model web/user -a
 - `-m` ou `--m` ou `--model`
 - `-c` ou `--c` ou `--controller`
 - `-s` ou `--s` ou `--service`
-- `-sc` ou `--sc` ou `--schema`
+- `-sc` ou `--sc` como atalho compacto para o scaffold de `requests/responses`
 - `-r` ou `--r` ou `--repository`
 - `-o` ou `--o` ou `--observer`
 - flags curtas podem ser agrupadas, por exemplo `-cr` ou `-mcr`
 - o caminho pode ter subpastas, por exemplo `web/user`
-- `-sc` sozinho continua sendo o atalho de `schema`; para combinar outras flags curtas, use grupos como `-cr` ou `-mcr`
+- `-sc` sozinho continua sendo o atalho do scaffold de `requests/responses`; para combinar outras flags curtas, use grupos como `-cr` ou `-mcr`
 
 Comportamento:
 
