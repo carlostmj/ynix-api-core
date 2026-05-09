@@ -1,3 +1,2 @@
-from app.core.base import BaseSchema
-from .example_process_request import ExampleProcessRequest
-from .example_process_response import ExampleProcessResponse
+from app.modules.example.requests import ExampleProcessRequest
+from app.modules.example.responses import ExampleProcessResponse

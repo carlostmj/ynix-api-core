@@ -10,7 +10,10 @@ from app.core.database import get_db
 from app.core.exceptions import AuthenticationError, PermissionDeniedError
 from app.core.security import decode_access_token, hash_api_key
 from app.modules.api_keys.models import ApiKey
+from app.modules.api_keys.repositories import ApiKeyRepository
 from app.modules.auth.models import User
+from app.modules.auth.repositories import UserRepository
+from app.modules.admin.repositories import AdminIdentityRepository
 from app.shared.permissions import has_scope
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -25,7 +28,7 @@ def current_user(
     if credentials is None:
         raise AuthenticationError("Token bearer obrigatorio")
     payload = decode_access_token(credentials.credentials)
-    user = db.query(User).filter(User.id == int(payload["sub"]), User.deleted_at.is_(None)).first()
+    user = UserRepository(db).find_by_id(int(payload["sub"]))
     if not user or not user.is_active:
         raise AuthenticationError("Usuario invalido ou inativo")
     request.state.user_id = user.id
@@ -40,12 +43,13 @@ def current_api_key(
     if not x_api_key:
         raise AuthenticationError("API Key obrigatoria")
     key_hash = hash_api_key(x_api_key)
-    api_key = db.query(ApiKey).filter(ApiKey.key_hash == key_hash, ApiKey.is_active.is_(True)).first()
+    repository = ApiKeyRepository(db)
+    api_key = repository.find_by_key_hash(key_hash)
     if not api_key or api_key.is_expired or api_key.is_blocked:
         create_security_event(db, "invalid_api_key", "API Key invalida ou expirada", request, "warning")
         raise AuthenticationError("API Key invalida ou expirada")
     request.state.api_key_id = api_key.id
-    api_key.touch(db)
+    repository.touch(api_key)
     return api_key
 
 
@@ -73,16 +77,7 @@ def current_admin_user(
     payload = decode_access_token(credentials.credentials)
     if not payload.get("admin"):
         raise PermissionDeniedError("Token administrativo requerido")
-    admin_user = (
-        db.query(User)
-        .filter(
-            User.id == int(payload["sub"]),
-            User.is_admin.is_(True),
-            User.deleted_at.is_(None),
-            User.is_active.is_(True),
-        )
-        .first()
-    )
+    admin_user = AdminIdentityRepository(db).find_admin_by_id(int(payload["sub"]))
     if not admin_user:
         raise AuthenticationError("Usuario administrativo invalido")
     request.state.admin_user_id = admin_user.id

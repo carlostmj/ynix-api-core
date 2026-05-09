@@ -16,7 +16,10 @@ def health():
 @router.get("/")
 def root():
     state = get_maintenance_state()
-    return success_response("Ynix FastAPI Core online", {"docs": "/docs", "health": "/health", "maintenance": state.enabled})
+    return success_response(
+        "Ynix FastAPI Core online",
+        {"docs": "/docs", "health": "/health", "maintenance": state.enabled},
+    )
 
 
 @router.get("/favicon.ico", include_in_schema=False)

@@ -1,1 +1,1 @@
-from .routes import router
+from .LogsRoutes import router

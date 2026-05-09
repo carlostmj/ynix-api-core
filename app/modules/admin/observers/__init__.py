@@ -1,2 +1,1 @@
-from .admin_audit_observer import AdminAuditObserver
-from .admin_catalog_observer import AdminCatalogObserver
+

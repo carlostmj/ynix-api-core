@@ -10,7 +10,7 @@ from sqlalchemy.orm import object_session
 
 import app.modules
 from app.core.base import BaseObserver
-from app.core.database import BaseModel
+from app.core.base.BaseModel import BaseModel
 
 logger = logging.getLogger("ynix.observers")
 _REGISTERED: set[type[BaseObserver]] = set()

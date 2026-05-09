@@ -1,1 +1,1 @@
-from .routes import router
+from .AuthRoutes import router

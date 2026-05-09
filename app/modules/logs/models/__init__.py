@@ -1,2 +1,2 @@
 from app.core.base import BaseModel
-from .request_log import RequestLog
+from .RequestLog import RequestLog

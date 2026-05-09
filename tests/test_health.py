@@ -14,4 +14,3 @@ def test_standard_error_response(client):
     assert body["success"] is False
     assert body["data"] is None
     assert body["errors"]
-

@@ -1,9 +1,7 @@
 from collections.abc import Generator
-from datetime import datetime
-from uuid import uuid4
 
-from sqlalchemy import DateTime, String, create_engine, func
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.core.config import settings
 
@@ -15,20 +13,6 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, expi
 
 class Base(DeclarativeBase):
     pass
-
-
-class BaseModel(Base):
-    __abstract__ = True
-
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    uuid: Mapped[str] = mapped_column(String(36), unique=True, index=True, default=lambda: str(uuid4()))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 def get_db() -> Generator[Session, None, None]:

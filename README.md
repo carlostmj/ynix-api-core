@@ -57,7 +57,7 @@ uvicorn app.main:app --reload
 - `app/core/`: configuracao, banco, seguranca, respostas, excecoes, middleware e manutencao
 - `app/modules/`: modulos de negocio
 - `console/`: comandos de CLI
-- `alembic/`: migrations
+- `app/modules/*/migrations/`: migrations por modulo
 - `tests/`: testes
 
 ## Configuracao
@@ -346,12 +346,14 @@ A URL SQLAlchemy e montada automaticamente:
 ### Migrations
 
 ```bash
-alembic revision --autogenerate -m "create initial tables"
-alembic upgrade head
-alembic check
+python console/manager.py make:migration auth create_users_table --model User
+python console/manager.py migrate
+python console/manager.py migrate:status
+python console/manager.py migrate:rollback
+python console/manager.py migrate:fresh
 ```
 
-Em desenvolvimento, `CREATE_TABLES_ON_STARTUP=true` permite iniciar sem migrations manuais. Em producao, prefira Alembic.
+Em desenvolvimento, `CREATE_TABLES_ON_STARTUP=true` permite iniciar sem migrations manuais. Em producao, prefira o fluxo de migrations do proprio core.
 
 Em producao, o core bloqueia configuracoes perigosas como `APP_DEBUG=true`, `CREATE_TABLES_ON_STARTUP=true`, `RATE_LIMIT_ENABLED=false`, `REQUEST_LOG_SAVE_BODY=true` e `CORS_ORIGINS=*`.
 
@@ -368,21 +370,24 @@ Isso cria:
 ```text
 app/modules/web/user/__init__.py
 app/modules/web/user/models/__init__.py
-app/modules/web/user/models/user.py
-app/modules/web/user/schemas/__init__.py
-app/modules/web/user/schemas/user_create_request.py
-app/modules/web/user/schemas/user_update_request.py
-app/modules/web/user/schemas/user_response.py
+app/modules/web/user/models/User.py
+app/modules/web/user/requests/__init__.py
+app/modules/web/user/requests/UserCreateRequest.py
+app/modules/web/user/requests/UserUpdateRequest.py
+app/modules/web/user/responses/__init__.py
+app/modules/web/user/responses/UserResponse.py
 app/modules/web/user/repositories/__init__.py
-app/modules/web/user/repositories/user_repository.py
+app/modules/web/user/repositories/UserRepository.py
 app/modules/web/user/services/__init__.py
-app/modules/web/user/services/user_service.py
+app/modules/web/user/services/UserService.py
 app/modules/web/user/controllers/__init__.py
-app/modules/web/user/controllers/user_controller.py
+app/modules/web/user/controllers/UserController.py
 app/modules/web/user/routes/__init__.py
-app/modules/web/user/routes/user_routes.py
+app/modules/web/user/routes/UserRoutes.py
 app/modules/web/user/observers/__init__.py
-app/modules/web/user/observers/user_observer.py
+app/modules/web/user/observers/UserObserver.py
+app/modules/web/user/migrations/__init__.py
+app/modules/web/user/migrations/2026_05_08_123456_create_users_table.py
 ```
 
 ### Criar apenas partes do modulo
@@ -391,7 +396,7 @@ app/modules/web/user/observers/user_observer.py
 python console/manager.py make:controller Web/User
 python console/manager.py make:controller web/user
 python console/manager.py make:service web/user
-python console/manager.py make:schema web/user
+python console/manager.py make:request web/user
 python console/manager.py make:repository web/user
 python console/manager.py make:observer web/user
 python console/manager.py make:observer web/user --model User
@@ -405,9 +410,82 @@ python console/manager.py make:model web/user -cr
 python console/manager.py make:model web/user -a
 python console/manager.py make:controller web/user -a
 python console/manager.py make:service web/user -a
-python console/manager.py make:schema web/user -a
+python console/manager.py make:request web/user -a
 python console/manager.py make:repository web/user -a
 ```
+
+### Observer CLI
+
+```bash
+python console/manager.py make:observer web/user
+python console/manager.py make:observer web/user --model User
+python console/manager.py create:observer web/user
+```
+
+O comando cria:
+
+```text
+app/modules/web/user/observers/__init__.py
+app/modules/web/user/observers/UserObserver.py
+```
+
+Use `--model` quando o nome do observer precisa apontar para uma classe especifica diferente do slug do modulo.
+
+### Migration CLI
+
+As migrations seguem um padrao bem proximo do Laravel:
+
+- ficam dentro de `app/modules/<modulo>/migrations/`
+- usam nome com timestamp no arquivo
+- cada arquivo expoe uma classe `Migration` com `up()` e `down()`
+- cada migration importa apenas `BaseMigration` do core
+- a base centraliza helpers como `string`, `integer`, `boolean`, `json`, `datetime`, `indexed`, `unique`, `foreign_id` e `foreign_uuid`
+- a aplicacao registra o que ja foi executado numa tabela `module_migrations`
+
+Criar uma migration:
+
+```bash
+python console/manager.py make:migration web/user create_users_table --model User
+```
+
+Aplicar migrations pendentes:
+
+```bash
+python console/manager.py migrate
+```
+
+Ver o status:
+
+```bash
+python console/manager.py migrate:status
+```
+
+Reverter a ultima batch:
+
+```bash
+python console/manager.py migrate:rollback
+```
+
+Resetar tudo:
+
+```bash
+python console/manager.py migrate:reset
+```
+
+Reiniciar e reaplicar tudo:
+
+```bash
+python console/manager.py migrate:fresh
+python console/manager.py migrate:refresh
+```
+
+Exemplo de arquivo gerado:
+
+```text
+app/modules/web/user/migrations/2026_05_08_123456_create_users_table.py
+```
+
+Quando o `--model` e informado, a migration criada registra a classe de referencia no stub gerado, deixando o arquivo pronto para automatizacoes e padronizacao futura.
 
 ### Alias global
 
@@ -422,20 +500,23 @@ python console/manager.py create:model web/user -a
 - `-m` ou `--m` ou `--model`
 - `-c` ou `--c` ou `--controller`
 - `-s` ou `--s` ou `--service`
-- `-sc` ou `--sc` ou `--schema`
+- `-sc` ou `--sc` como atalho compacto para o scaffold de `requests/responses`
 - `-r` ou `--r` ou `--repository`
 - `-o` ou `--o` ou `--observer`
 - flags curtas podem ser agrupadas, por exemplo `-cr` ou `-mcr`
 - o caminho pode ter subpastas, por exemplo `web/user`
-- `-sc` sozinho continua sendo o atalho de `schema`; para combinar outras flags curtas, use grupos como `-cr` ou `-mcr`
+- `-sc` sozinho continua sendo o atalho do scaffold de `requests/responses`; para combinar outras flags curtas, use grupos como `-cr` ou `-mcr`
 
 Comportamento:
 
 - sem flags, `make:model` gera `models/<entidade>.py`
 - com flags, ele gera so os arquivos pedidos
 - com `--all`, ele gera o scaffold completo do modulo
-- os comandos `make:module`, `make:controller`, `make:service`, `make:schema` e `make:repository` tambem aceitam flags e `--all`
+- os comandos `make:module`, `make:controller`, `make:service`, `make:request` e `make:repository` tambem aceitam flags e `--all`
 - os comandos completos tambem criam `observers/` com um observer base por modulo
+- os comandos completos tambem criam `migrations/` como area reservada por modulo
+- quando o modulo inclui model, a scaffold completa tambem gera uma migration inicial no estilo Laravel
+- `migrate`, `migrate:rollback`, `migrate:reset`, `migrate:status`, `migrate:fresh` e `migrate:refresh` seguem o fluxo Artisan
 
 ## Observers
 
@@ -454,10 +535,10 @@ O core carrega observers automaticamente no startup e registra os hooks no SQLAl
 ### Estrutura
 
 ```text
-app/modules/auth/observers/user_observer.py
-app/modules/api_keys/observers/api_key_observer.py
-app/modules/example/observers/example_record_observer.py
-app/modules/admin/observers/admin_catalog_observer.py
+app/modules/auth/observers/UserObserver.py
+app/modules/api_keys/observers/ApiKeyObserver.py
+app/modules/example/observers/ExampleRecordObserver.py
+app/modules/admin/observers/AdminCatalogObserver.py
 ```
 
 ### Exemplo
@@ -514,7 +595,7 @@ python console/manager.py list
 - `make:service`
 - `make:model`
 - `create:model`
-- `make:schema`
+- `make:request`
 - `make:repository`
 - `make:observer`
 - `create:observer`
@@ -703,26 +784,52 @@ O `docker-compose.yml` inclui:
 Cada modulo segue a mesma convencao:
 
 ```text
-models/<entidade>.py
-schemas/<entidade>_create_request.py
-schemas/<entidade>_update_request.py
-schemas/<entidade>_response.py
-repositories/<entidade>_repository.py
-services/<entidade>_service.py
-controllers/<entidade>_controller.py
-routes/<entidade>_routes.py
-observers/<entidade>_observer.py
+models/<Entidade>.py
+requests/<Entidade>CreateRequest.py
+requests/<Entidade>UpdateRequest.py
+responses/<Entidade>Response.py
+repositories/<Entidade>Repository.py
+services/<Entidade>Service.py
+controllers/<Entidade>Controller.py
+routes/<Entidade>Routes.py
+observers/<Entidade>Observer.py
+migrations/__init__.py
 ```
 
-As rotas sao carregadas automaticamente quando o modulo exporta `router` em `routes/<entidade>_routes.py`.
+As rotas sao carregadas automaticamente quando o modulo exporta `router` em `routes/<Entidade>Routes.py`.
 Os arquivos concretos importam diretamente de `app.core.base`, entao nao existe mais `base.py` local em cada modulo.
+
+### Modelo No Estilo Laravel
+
+Cada model pode declarar metadados para facilitar criacao, cast e serializacao:
+
+```python
+class User(BaseModel):
+    table = "users"
+    fillable = (
+        "name",
+        "email",
+        "password_hash",
+        "roles",
+    )
+    protected = {
+        "password_hash",
+    }
+    casts = {
+        "roles": list,
+        "is_active": bool,
+        "last_login_at": datetime,
+    }
+```
+
+O `BaseRepository` usa `fillable` ao criar ou atualizar registros a partir de dicts, e `protected` esconde campos sensiveis em `to_dict()`. As migrations ficam separadas em `app/core/base` e nos modulos, com uma classe `Migration` por arquivo, importando apenas `BaseMigration` e usando os helpers da base para declarar colunas, tipos, defaults, indices e chaves estrangeiras.
 
 ## Criar Um Novo Projeto A Partir Do Core
 
 1. Duplique esta pasta para um novo nome de projeto.
 2. Ajuste `APP_NAME`, `DB_DATABASE`, `JWT_SECRET` e `API_KEY_PREFIX`.
-3. Crie o modulo inicial com `make:module` ou `make:model --all`.
-4. Rode `alembic upgrade head`.
+3. Crie o modulo inicial com `make:module` ou `make:model --all` para receber model e migration inicial.
+4. Rode `python console/manager.py migrate`.
 5. Crie o admin inicial com `create:admin`.
 6. Inicie com `python run.py serve --reload`.
 

@@ -1,10 +1,9 @@
-from app.core.base import BaseSchema
-from .admin_create_user_request import AdminCreateUserRequest
-from .admin_identity_response import AdminIdentityResponse
-from .admin_list_response import AdminListResponse
-from .admin_login_request import AdminLoginRequest
-from .ip_rule_request import IpRuleRequest
-from .maintenance_mode_request import MaintenanceModeRequest
-from .maintenance_mode_response import MaintenanceModeResponse
-from .permission_request import PermissionRequest
-from .role_request import RoleRequest
+from app.modules.admin.requests import (
+    AdminCreateUserRequest,
+    AdminLoginRequest,
+    IpRuleRequest,
+    MaintenanceModeRequest,
+    PermissionRequest,
+    RoleRequest,
+)
+from app.modules.admin.responses import AdminIdentityResponse, AdminListResponse, MaintenanceModeResponse

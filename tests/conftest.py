@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 os.environ["DB_CONNECTION"] = "sqlite"
 os.environ["DB_DATABASE"] = "test.sqlite"
@@ -7,6 +8,10 @@ os.environ["RATE_LIMIT_ENABLED"] = "false"
 os.environ["JWT_SECRET"] = "test-secret-0123456789abcdef0123456789abcdef"
 os.environ["ADMIN_EMAIL"] = "admin@example.com"
 os.environ["ADMIN_PASSWORD"] = "admin123456"
+
+test_db = Path(__file__).resolve().parents[1] / "test.sqlite"
+if test_db.exists():
+    test_db.unlink()
 
 import pytest
 from fastapi.testclient import TestClient
