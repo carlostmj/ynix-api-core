@@ -4,6 +4,7 @@ from datetime import datetime
 
 from console.commands.templates import (
     CONTROLLER_TEMPLATE,
+    CONFIG_TEMPLATE,
     MIGRATION_TEMPLATE,
     OBSERVER_TEMPLATE,
     MODEL_TEMPLATE,
@@ -18,7 +19,7 @@ from console.commands.templates import (
 from console.commands.writer import module_dir, write_file
 
 PART_FLAG_ORDER = ("model", "schema", "repository", "service", "controller", "observer")
-PART_ORDER = ("model", "schema", "repository", "service", "controller", "routes", "observer", "migrations")
+PART_ORDER = ("model", "schema", "repository", "service", "controller", "routes", "observer", "migrations", "config")
 
 PART_TO_DIRECTORY = {
     "model": "models",
@@ -29,6 +30,7 @@ PART_TO_DIRECTORY = {
     "routes": "routes",
     "observer": "observers",
     "migrations": "migrations",
+    "config": "config",
 }
 
 PART_TO_FILENAME = {
@@ -38,6 +40,7 @@ PART_TO_FILENAME = {
     "controller": "{controller_file_name}",
     "routes": "{routes_file_name}",
     "observer": "{observer_file_name}",
+    "config": "{config_file_name}",
 }
 
 PART_TO_TEMPLATE = {
@@ -47,6 +50,7 @@ PART_TO_TEMPLATE = {
     "controller": CONTROLLER_TEMPLATE,
     "routes": ROUTES_TEMPLATE,
     "observer": OBSERVER_TEMPLATE,
+    "config": CONFIG_TEMPLATE,
 }
 
 SCHEMA_FILE_SPECS = (
@@ -144,6 +148,12 @@ def emit_scaffold(name: str, options: ScaffoldOptions, default_parts: tuple[str,
                     package_dir / migration_data["migration_file_name"],
                     MIGRATION_TEMPLATE.substitute(migration_data),
                 )
+            continue
+        if part == "config":
+            package_dir = path / PART_TO_DIRECTORY[part]
+            write_file(package_dir / "__init__.py", "")
+            filename = PART_TO_FILENAME.get(part, "{config_file_name}").format(**context)
+            write_file(package_dir / filename, CONFIG_TEMPLATE.substitute(context))
             continue
         if part == "observer":
             package_dir = path / PART_TO_DIRECTORY[part]

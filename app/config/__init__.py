@@ -17,10 +17,10 @@ __all__ = [
 ]
 
 
-def _read_config(module: ModuleType, module_name: str) -> dict[str, Any]:
+def _read_config(module: ModuleType, module_name: str) -> dict[str, Any] | None:
     raw_config = getattr(module, "config", getattr(module, "CONFIG", None))
     if raw_config is None:
-        return {}
+        return None
     if not isinstance(raw_config, dict):
         raise TypeError(f"config em {module_name} precisa ser um dict")
     return raw_config
@@ -47,7 +47,7 @@ def load_configs(config_dir: Path | None = None) -> dict[str, dict[str, Any]]:
                 continue
             module = importlib.import_module(f"{package_name}.{module_info.name}")
             config = _read_config(module, module_info.name)
-            if config:
+            if config is not None:
                 sections[module_info.name] = config
         return dict(sorted(sections.items()))
 
@@ -57,7 +57,7 @@ def load_configs(config_dir: Path | None = None) -> dict[str, dict[str, Any]]:
         module_name = f"app_config_{path.stem}"
         module = _load_module_from_path(module_name, path)
         config = _read_config(module, path.stem)
-        if config:
+        if config is not None:
             sections[path.stem] = config
 
     return dict(sorted(sections.items()))
@@ -84,7 +84,7 @@ def load_module_configs(modules_dir: Path | None = None) -> dict[str, dict[str, 
             module_name = f"app_modules_{module_dir.name}_{path.stem}"
             module = _load_module_from_path(module_name, path)
             config = _read_config(module, path.stem)
-            if config:
+            if config is not None:
                 sections[path.stem] = config
 
         if sections:

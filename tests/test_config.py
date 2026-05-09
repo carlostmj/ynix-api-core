@@ -61,7 +61,8 @@ def test_load_module_configs_discovers_new_module_sections(tmp_path):
 
 def test_loaded_module_configs_are_accessible():
     assert isinstance(module_configs, dict)
-    assert get_module_config("pix", "asaas", {}) == {}
+    assert module_configs["example"]["example"] == {"enabled": True, "label": "Example module"}
+    assert get_module_config("example", "example", {}) == {"enabled": True, "label": "Example module"}
 
 
 @pytest.mark.parametrize(

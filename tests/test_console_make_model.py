@@ -37,6 +37,8 @@ def test_make_module_with_all_creates_nested_scaffold(tmp_path, monkeypatch):
     assert (module_dir / "observers" / "__init__.py").exists()
     assert (module_dir / "observers" / "UserObserver.py").exists()
     assert (module_dir / "migrations" / "__init__.py").exists()
+    assert (module_dir / "config" / "__init__.py").exists()
+    assert (module_dir / "config" / "UserConfig.py").exists()
     assert len(list((module_dir / "migrations").glob("*_create_users_table.py"))) == 1
 
 
@@ -61,6 +63,7 @@ def test_make_model_with_selective_flags_creates_only_requested_parts(tmp_path, 
     assert (module_dir / "controllers" / "AccountController.py").exists()
     assert not (module_dir / "routes").exists()
     assert not (module_dir / "migrations").exists()
+    assert not (module_dir / "config").exists()
 
 
 def test_make_module_accepts_path_and_compact_flags(tmp_path, monkeypatch):
@@ -82,6 +85,7 @@ def test_make_module_accepts_path_and_compact_flags(tmp_path, monkeypatch):
     assert (module_dir / "repositories" / "UserRepository.py").exists()
     assert not (module_dir / "routes").exists()
     assert not (module_dir / "migrations").exists()
+    assert not (module_dir / "config").exists()
 
 
 def test_make_controller_with_all_creates_full_nested_scaffold(tmp_path, monkeypatch):
@@ -111,6 +115,8 @@ def test_make_controller_with_all_creates_full_nested_scaffold(tmp_path, monkeyp
     assert (module_dir / "observers" / "__init__.py").exists()
     assert (module_dir / "observers" / "OrdersObserver.py").exists()
     assert (module_dir / "migrations" / "__init__.py").exists()
+    assert (module_dir / "config" / "__init__.py").exists()
+    assert (module_dir / "config" / "OrdersConfig.py").exists()
     assert len(list((module_dir / "migrations").glob("*_create_orders_table.py"))) == 1
 
 

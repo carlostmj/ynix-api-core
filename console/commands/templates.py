@@ -55,6 +55,7 @@ def module_context(name: str) -> dict[str, str]:
         "controller_file_name": f"{entity_name}Controller.py",
         "routes_file_name": f"{entity_name}Routes.py",
         "observer_file_name": f"{entity_name}Observer.py",
+        "config_file_name": f"{entity_name}Config.py",
         "table_name": table_name_for(entity_slug),
         "module_namespace": module_namespace,
         "module_path": module_path,
@@ -153,6 +154,11 @@ class ${schema_prefix}Response(BaseSchema):
 
 SCHEMA_BASE_TEMPLATE = Template(
     """from app.core.base import BaseSchema
+"""
+)
+
+CONFIG_TEMPLATE = Template(
+    """config = {}
 """
 )
 

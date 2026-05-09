@@ -6,6 +6,6 @@ def make_module(args: list[str] | str) -> None:
     emit_scaffold(
         options.name,
         options,
-        ("model", "schema", "repository", "service", "controller", "routes", "observer", "migrations"),
+        ("model", "schema", "repository", "service", "controller", "routes", "observer", "migrations", "config"),
     )
     print("Modulo criado com arquivos separados por responsabilidade.")

@@ -55,7 +55,7 @@ uvicorn app.main:app --reload
 - `console/manager.py`: entrada principal do console no estilo Artisan
 - `app/main.py`: ponto de entrada da aplicacao FastAPI
 - `app/bootstrap/app.py`: cria o app, registra middlewares, rotas e bootstrap do banco
-- `app/core/`: configuracao, banco, seguranca, respostas, excecoes, middleware e manutencao
+- `app/core/`: base do sistema, com configuracao, banco, seguranca, respostas, excecoes, middleware e manutencao
 - `app/config/*.py`: defaults globais do core, carregados automaticamente
 - `app/modules/*/config/*.py`: defaults por modulo, carregados automaticamente
 - `app/modules/`: modulos de negocio
@@ -139,9 +139,13 @@ copy .env.example .env
 
 ### Configuracoes Em Arquivos
 
-Os defaults globais ficam organizados em `app/config/*.py` e os defaults especificos de cada modulo em `app/modules/<modulo>/config/*.py`.
+A estrutura segue uma ideia parecida com Laravel:
 
-Se você criar um novo arquivo em qualquer uma dessas pastas, ele entra automaticamente no carregamento desde que exporte um dict `config` ou `CONFIG`.
+- `app/config/*.py` guarda configuracoes globais do core
+- `app/modules/<modulo>/config/*.py` guarda configuracoes do modulo
+- novos arquivos nessas pastas entram automaticamente no carregamento se exportarem `config` ou `CONFIG`
+
+Isso deixa o core enxuto e cada modulo com sua propria area de configuracao, sem misturar dominio de negocio com infra global.
 
 ### Exemplo MySQL
 
@@ -395,6 +399,8 @@ app/modules/web/user/routes/__init__.py
 app/modules/web/user/routes/UserRoutes.py
 app/modules/web/user/observers/__init__.py
 app/modules/web/user/observers/UserObserver.py
+app/modules/web/user/config/__init__.py
+app/modules/web/user/config/UserConfig.py
 app/modules/web/user/migrations/__init__.py
 app/modules/web/user/migrations/2026_05_08_123456_create_users_table.py
 ```
