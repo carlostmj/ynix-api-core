@@ -24,14 +24,6 @@ def test_console_help_shows_command_details(capsys):
     assert "Exige nome: sim" in output
 
 
-def test_console_help_shows_schema_alias(capsys):
-    main(["help", "make:schema"])
-
-    output = capsys.readouterr().out
-    assert "Comando: make:schema" in output
-    assert "Alias de make:request" in output
-
-
 def test_console_status_is_available(capsys):
     main(["status"])
 

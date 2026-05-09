@@ -22,7 +22,6 @@ from console.commands.migrate_fresh import migrate_fresh
 from console.commands.migrate import migrate
 from console.commands.migrate_status import migrate_status
 from console.commands.make_repository import make_repository
-from console.commands.make_schema import make_schema
 from console.commands.make_service import make_service
 from console.commands.migrate_reset import migrate_reset
 from console.commands.rollback_migration import rollback_migration
@@ -81,13 +80,6 @@ def build_kernel() -> ArtisanKernel:
         requires_name=True,
         accepts_flags=True,
         help="Cria requests e responses do modulo",
-    )
-    kernel.register(
-        "make:schema",
-        make_schema,
-        requires_name=True,
-        accepts_flags=True,
-        help="Alias de make:request",
     )
     kernel.register(
         "make:repository",
