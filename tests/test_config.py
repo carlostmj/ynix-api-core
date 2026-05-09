@@ -3,6 +3,7 @@ import importlib
 import pytest
 from pydantic import ValidationError
 
+from app.config import configs, load_configs
 from app.core.config import Settings
 
 
@@ -14,6 +15,26 @@ def test_sqlite_fallback_without_env(monkeypatch):
     reloaded = importlib.reload(config)
 
     assert reloaded.settings.sqlalchemy_database_url == "sqlite:///./database.sqlite"
+
+
+def test_config_sections_are_loaded():
+    assert "app" in configs
+    assert "database" in configs
+    assert configs["app"]["app_name"] == "Ynix FastAPI Core"
+    assert configs["security"]["api_key_prefix"] == "ynix"
+
+
+def test_load_configs_discovers_new_files(tmp_path):
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    (config_dir / "payments.py").write_text(
+        "config = {'enabled': True, 'provider': 'asaas'}\n",
+        encoding="utf-8",
+    )
+
+    loaded = load_configs(config_dir)
+
+    assert loaded["payments"] == {"enabled": True, "provider": "asaas"}
 
 
 @pytest.mark.parametrize(

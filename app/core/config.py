@@ -6,6 +6,17 @@ from urllib.parse import quote_plus
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.config import configs as config_sections
+
+
+APP_CONFIG = config_sections["app"]
+DATABASE_CONFIG = config_sections["database"]
+SECURITY_CONFIG = config_sections["security"]
+MAINTENANCE_CONFIG = config_sections["maintenance"]
+OBSERVABILITY_CONFIG = config_sections["observability"]
+ADMIN_CONFIG = config_sections["admin"]
+RUNTIME_CONFIG = config_sections["runtime"]
+
 
 def _bootstrap_default_environment() -> None:
     project_root = Path(__file__).resolve().parents[2]
@@ -18,63 +29,63 @@ _bootstrap_default_environment()
 
 
 class Settings(BaseSettings):
-    app_name: str = "Ynix FastAPI Core"
-    app_version: str = "1.0.0"
-    app_env: str = "local"
-    app_debug: bool = True
-    app_url: str = "http://localhost:8000"
+    app_name: str = APP_CONFIG["app_name"]
+    app_version: str = APP_CONFIG["app_version"]
+    app_env: str = APP_CONFIG["app_env"]
+    app_debug: bool = APP_CONFIG["app_debug"]
+    app_url: str = APP_CONFIG["app_url"]
 
-    db_connection: str = "mysql"
-    db_driver: str = "pymysql"
-    db_host: str = "127.0.0.1"
-    db_port: int | None = None
-    db_database: str = "ynix_core"
-    db_username: str = "root"
-    db_password: str = ""
-    create_tables_on_startup: bool = True
+    db_connection: str = DATABASE_CONFIG["db_connection"]
+    db_driver: str = DATABASE_CONFIG["db_driver"]
+    db_host: str = DATABASE_CONFIG["db_host"]
+    db_port: int | None = DATABASE_CONFIG["db_port"]
+    db_database: str = DATABASE_CONFIG["db_database"]
+    db_username: str = DATABASE_CONFIG["db_username"]
+    db_password: str = DATABASE_CONFIG["db_password"]
+    create_tables_on_startup: bool = DATABASE_CONFIG["create_tables_on_startup"]
 
-    jwt_secret: str = "change-me"
-    jwt_algorithm: str = "HS256"
-    jwt_expires_minutes: int = 1440
+    jwt_secret: str = SECURITY_CONFIG["jwt_secret"]
+    jwt_algorithm: str = SECURITY_CONFIG["jwt_algorithm"]
+    jwt_expires_minutes: int = SECURITY_CONFIG["jwt_expires_minutes"]
 
-    api_key_prefix: str = "ynix"
-    admin_secret: str | None = None
-    maintenance_state_path: str = "storage/maintenance.json"
+    api_key_prefix: str = SECURITY_CONFIG["api_key_prefix"]
+    admin_secret: str | None = SECURITY_CONFIG["admin_secret"]
+    maintenance_state_path: str = MAINTENANCE_CONFIG["maintenance_state_path"]
 
-    cors_origins: list[str] = Field(default_factory=lambda: ["*"])
-    max_request_size_bytes: int = 2 * 1024 * 1024
+    cors_origins: list[str] = Field(default_factory=lambda: list(OBSERVABILITY_CONFIG["cors_origins"]))
+    max_request_size_bytes: int = OBSERVABILITY_CONFIG["max_request_size_bytes"]
 
-    rate_limit_enabled: bool = True
-    rate_limit_per_minute: int = 60
-    rate_limit_burst: int = 100
+    rate_limit_enabled: bool = OBSERVABILITY_CONFIG["rate_limit_enabled"]
+    rate_limit_per_minute: int = OBSERVABILITY_CONFIG["rate_limit_per_minute"]
+    rate_limit_burst: int = OBSERVABILITY_CONFIG["rate_limit_burst"]
 
-    request_log_enabled: bool = True
-    request_log_save_body: bool = False
-    error_log_enabled: bool = True
-    security_log_enabled: bool = True
-    ip_block_enabled: bool = True
-    admin_audit_enabled: bool = True
-    system_health_enabled: bool = True
+    request_log_enabled: bool = OBSERVABILITY_CONFIG["request_log_enabled"]
+    request_log_save_body: bool = OBSERVABILITY_CONFIG["request_log_save_body"]
+    error_log_enabled: bool = OBSERVABILITY_CONFIG["error_log_enabled"]
+    security_log_enabled: bool = OBSERVABILITY_CONFIG["security_log_enabled"]
+    ip_block_enabled: bool = OBSERVABILITY_CONFIG["ip_block_enabled"]
+    admin_audit_enabled: bool = OBSERVABILITY_CONFIG["admin_audit_enabled"]
+    system_health_enabled: bool = OBSERVABILITY_CONFIG["system_health_enabled"]
 
-    admin_email: str | None = None
-    admin_password: str | None = None
-    admin_bootstrap_enabled: bool = True
+    admin_email: str | None = ADMIN_CONFIG["admin_email"]
+    admin_password: str | None = ADMIN_CONFIG["admin_password"]
+    admin_bootstrap_enabled: bool = ADMIN_CONFIG["admin_bootstrap_enabled"]
 
-    supervisor_enabled: bool = True
-    supervisor_restart_on_crash: bool = True
-    supervisor_max_restarts: int = 10
-    supervisor_restart_delay_seconds: int = 3
+    supervisor_enabled: bool = RUNTIME_CONFIG["supervisor_enabled"]
+    supervisor_restart_on_crash: bool = RUNTIME_CONFIG["supervisor_restart_on_crash"]
+    supervisor_max_restarts: int = RUNTIME_CONFIG["supervisor_max_restarts"]
+    supervisor_restart_delay_seconds: int = RUNTIME_CONFIG["supervisor_restart_delay_seconds"]
 
-    queue_connection: str = "sync"
-    queue_name: str = "default"
-    queue_retry_attempts: int = 3
-    queue_retry_delay_seconds: int = 5
-    redis_url: str = "redis://127.0.0.1:6379/0"
+    queue_connection: str = RUNTIME_CONFIG["queue_connection"]
+    queue_name: str = RUNTIME_CONFIG["queue_name"]
+    queue_retry_attempts: int = RUNTIME_CONFIG["queue_retry_attempts"]
+    queue_retry_delay_seconds: int = RUNTIME_CONFIG["queue_retry_delay_seconds"]
+    redis_url: str = RUNTIME_CONFIG["redis_url"]
 
-    scheduler_enabled: bool = True
-    scheduler_tick_seconds: int = 60
+    scheduler_enabled: bool = RUNTIME_CONFIG["scheduler_enabled"]
+    scheduler_tick_seconds: int = RUNTIME_CONFIG["scheduler_tick_seconds"]
 
-    log_level: str = "INFO"
+    log_level: str = RUNTIME_CONFIG["log_level"]
 
     model_config = SettingsConfigDict(
         env_file=".env",
