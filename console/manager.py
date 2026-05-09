@@ -17,6 +17,7 @@ from console.commands.make_model import make_model
 from console.commands.make_migration import make_migration
 from console.commands.make_module import make_module
 from console.commands.make_observer import make_observer
+from console.commands.make_request import make_request
 from console.commands.migrate_fresh import migrate_fresh
 from console.commands.migrate import migrate
 from console.commands.migrate_status import migrate_status
@@ -75,18 +76,18 @@ def build_kernel() -> ArtisanKernel:
         help="Alias de make:model",
     )
     kernel.register(
-        "make:schema",
-        make_schema,
+        "make:request",
+        make_request,
         requires_name=True,
         accepts_flags=True,
         help="Cria requests e responses do modulo",
     )
     kernel.register(
-        "make:request",
+        "make:schema",
         make_schema,
         requires_name=True,
         accepts_flags=True,
-        help="Alias de make:schema",
+        help="Alias de make:request",
     )
     kernel.register(
         "make:repository",

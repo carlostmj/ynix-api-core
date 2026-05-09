@@ -396,8 +396,8 @@ app/modules/web/user/migrations/2026_05_08_123456_create_users_table.py
 python console/manager.py make:controller Web/User
 python console/manager.py make:controller web/user
 python console/manager.py make:service web/user
-python console/manager.py make:schema web/user
 python console/manager.py make:request web/user
+python console/manager.py make:schema web/user
 python console/manager.py make:repository web/user
 python console/manager.py make:observer web/user
 python console/manager.py make:observer web/user --model User
@@ -411,8 +411,8 @@ python console/manager.py make:model web/user -cr
 python console/manager.py make:model web/user -a
 python console/manager.py make:controller web/user -a
 python console/manager.py make:service web/user -a
-python console/manager.py make:schema web/user -a
 python console/manager.py make:request web/user -a
+python console/manager.py make:schema web/user -a
 python console/manager.py make:repository web/user -a
 ```
 
@@ -514,7 +514,7 @@ Comportamento:
 - sem flags, `make:model` gera `models/<entidade>.py`
 - com flags, ele gera so os arquivos pedidos
 - com `--all`, ele gera o scaffold completo do modulo
-- os comandos `make:module`, `make:controller`, `make:service`, `make:schema`, `make:request` e `make:repository` tambem aceitam flags e `--all`
+- os comandos `make:module`, `make:controller`, `make:service`, `make:request`, `make:schema` e `make:repository` tambem aceitam flags e `--all`
 - os comandos completos tambem criam `observers/` com um observer base por modulo
 - os comandos completos tambem criam `migrations/` como area reservada por modulo
 - quando o modulo inclui model, a scaffold completa tambem gera uma migration inicial no estilo Laravel
@@ -597,8 +597,8 @@ python console/manager.py list
 - `make:service`
 - `make:model`
 - `create:model`
-- `make:schema`
 - `make:request`
+- `make:schema` alias de `make:request`
 - `make:repository`
 - `make:observer`
 - `create:observer`

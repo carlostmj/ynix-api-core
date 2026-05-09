@@ -9,18 +9,27 @@ def test_console_list_shows_registered_commands(capsys):
     assert "Comandos disponiveis:" in output
     assert "make:model" in output
     assert "create:admin" in output
+    assert "make:request" in output
     assert "migrate:status" in output
     assert "migrate:reset" in output
     assert "migrate:fresh" in output
 
 
 def test_console_help_shows_command_details(capsys):
-    main(["help", "make:model"])
+    main(["help", "make:request"])
 
     output = capsys.readouterr().out
-    assert "Comando: make:model" in output
+    assert "Comando: make:request" in output
     assert "Aceita flags: sim" in output
     assert "Exige nome: sim" in output
+
+
+def test_console_help_shows_schema_alias(capsys):
+    main(["help", "make:schema"])
+
+    output = capsys.readouterr().out
+    assert "Comando: make:schema" in output
+    assert "Alias de make:request" in output
 
 
 def test_console_status_is_available(capsys):
