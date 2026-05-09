@@ -3,7 +3,7 @@ import importlib
 import pytest
 from pydantic import ValidationError
 
-from app.config import configs, load_configs
+from app.config import configs, get_module_config, load_configs, load_module_configs, module_configs
 from app.core.config import Settings
 
 
@@ -35,6 +35,33 @@ def test_load_configs_discovers_new_files(tmp_path):
     loaded = load_configs(config_dir)
 
     assert loaded["payments"] == {"enabled": True, "provider": "asaas"}
+
+
+def test_load_module_configs_discovers_new_module_sections(tmp_path):
+    modules_dir = tmp_path / "modules"
+    pix_config_dir = modules_dir / "pix" / "config"
+    admin_config_dir = modules_dir / "admin" / "config"
+    pix_config_dir.mkdir(parents=True)
+    admin_config_dir.mkdir(parents=True)
+
+    (pix_config_dir / "asaas.py").write_text(
+        "config = {'enabled': True, 'provider': 'asaas'}\n",
+        encoding="utf-8",
+    )
+    (admin_config_dir / "permissions.py").write_text(
+        "CONFIG = {'audit': True}\n",
+        encoding="utf-8",
+    )
+
+    loaded = load_module_configs(modules_dir)
+
+    assert loaded["pix"]["asaas"] == {"enabled": True, "provider": "asaas"}
+    assert loaded["admin"]["permissions"] == {"audit": True}
+
+
+def test_loaded_module_configs_are_accessible():
+    assert isinstance(module_configs, dict)
+    assert get_module_config("pix", "asaas", {}) == {}
 
 
 @pytest.mark.parametrize(

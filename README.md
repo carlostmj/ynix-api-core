@@ -56,7 +56,8 @@ uvicorn app.main:app --reload
 - `app/main.py`: ponto de entrada da aplicacao FastAPI
 - `app/bootstrap/app.py`: cria o app, registra middlewares, rotas e bootstrap do banco
 - `app/core/`: configuracao, banco, seguranca, respostas, excecoes, middleware e manutencao
-- `app/config/*.py`: defaults por dominio, carregados automaticamente pelo core
+- `app/config/*.py`: defaults globais do core, carregados automaticamente
+- `app/modules/*/config/*.py`: defaults por modulo, carregados automaticamente
 - `app/modules/`: modulos de negocio
 - `console/`: comandos de CLI
 - `app/modules/*/migrations/`: migrations por modulo
@@ -138,9 +139,9 @@ copy .env.example .env
 
 ### Configuracoes Em Arquivos
 
-Os defaults do projeto agora ficam organizados em `app/config/*.py`, separados por dominio.
+Os defaults globais ficam organizados em `app/config/*.py` e os defaults especificos de cada modulo em `app/modules/<modulo>/config/*.py`.
 
-Se você criar um novo arquivo em `app/config/`, ele entra automaticamente no carregamento desde que exporte um dict `config` ou `CONFIG`.
+Se você criar um novo arquivo em qualquer uma dessas pastas, ele entra automaticamente no carregamento desde que exporte um dict `config` ou `CONFIG`.
 
 ### Exemplo MySQL
 
