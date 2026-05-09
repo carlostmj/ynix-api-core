@@ -6,7 +6,7 @@ from console.commands.writer import module_dir, write_file
 
 
 def make_observer(args: list[str] | str) -> None:
-    parser = argparse.ArgumentParser(prog="python console/manage.py make:observer")
+    parser = argparse.ArgumentParser(prog="python console/manager.py make:observer")
     parser.add_argument("name")
     parser.add_argument("--model")
     parser.add_argument("--all", action="store_true")

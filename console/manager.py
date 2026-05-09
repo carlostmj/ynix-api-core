@@ -61,18 +61,20 @@ def build_kernel() -> ArtisanKernel:
         help="Cria um scaffold parcial ou completo a partir de um model",
     )
     kernel.register(
-        "make:migration",
-        make_migration,
-        requires_name=True,
-        accepts_flags=True,
-        help="Cria uma migration no estilo Laravel dentro do modulo",
-    )
-    kernel.register(
         "create:model",
         make_model,
         requires_name=True,
         accepts_flags=True,
         help="Alias de make:model",
+        visible=False,
+        alias_for="make:model",
+    )
+    kernel.register(
+        "make:migration",
+        make_migration,
+        requires_name=True,
+        accepts_flags=True,
+        help="Cria uma migration no estilo Laravel dentro do modulo",
     )
     kernel.register(
         "make:request",
@@ -101,6 +103,8 @@ def build_kernel() -> ArtisanKernel:
         requires_name=True,
         accepts_flags=True,
         help="Alias de make:observer",
+        visible=False,
+        alias_for="make:observer",
     )
     kernel.register("migrate", migrate, help="Aplica as migrations pendentes")
     kernel.register("migrate:rollback", rollback_migration, help="Reverte a ultima batch de migrations")
@@ -109,10 +113,18 @@ def build_kernel() -> ArtisanKernel:
     kernel.register("migrate:fresh", migrate_fresh, help="Reinicia todas as migrations e aplica novamente")
     kernel.register("migrate:refresh", migrate_fresh, help="Alias de migrate:fresh")
     kernel.register(
-        "create:admin",
+        "make:admin",
         create_admin,
         accepts_flags=True,
         help="Cria ou promove um usuario para administrador",
+    )
+    kernel.register(
+        "create:admin",
+        create_admin,
+        accepts_flags=True,
+        help="Alias de make:admin",
+        visible=False,
+        alias_for="make:admin",
     )
     kernel.register("status", lambda _: print_status(), help="Mostra o status do ambiente")
     kernel.register("list", lambda _: print(kernel.render_list()), help="Lista todos os comandos")

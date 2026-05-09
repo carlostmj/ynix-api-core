@@ -13,6 +13,8 @@ class CommandDefinition:
     requires_name: bool = False
     accepts_flags: bool = False
     help: str | None = None
+    visible: bool = True
+    alias_for: str | None = None
 
 
 class ArtisanKernel:
@@ -27,23 +29,32 @@ class ArtisanKernel:
         requires_name: bool = False,
         accepts_flags: bool = False,
         help: str | None = None,
+        visible: bool = True,
+        alias_for: str | None = None,
     ) -> None:
         self._commands[name] = CommandDefinition(
             handler=handler,
             requires_name=requires_name,
             accepts_flags=accepts_flags,
             help=help,
+            visible=visible,
+            alias_for=alias_for,
         )
 
     def get(self, name: str) -> CommandDefinition | None:
         return self._commands.get(name)
 
-    def names(self) -> list[str]:
-        return sorted(self._commands)
+    def names(self, *, include_hidden: bool = False) -> list[str]:
+        names = [
+            name
+            for name, definition in self._commands.items()
+            if include_hidden or definition.visible
+        ]
+        return sorted(names)
 
     def run(self, argv: list[str], prog: str = "python console/manager.py") -> None:
         parser = argparse.ArgumentParser(prog=prog)
-        parser.add_argument("command", choices=self.names())
+        parser.add_argument("command", choices=self.names(include_hidden=True))
         parser.add_argument("args", nargs=argparse.REMAINDER)
         parsed = parser.parse_args(argv)
         self.dispatch(parsed.command, parsed.args)
@@ -73,6 +84,8 @@ class ArtisanKernel:
             raise SystemExit(f"Comando desconhecido: {command_name}")
 
         lines = [f"Comando: {command_name}"]
+        if definition.alias_for:
+            lines.append(f"Alias de: {definition.alias_for}")
         if definition.help:
             lines.append(f"Descricao: {definition.help}")
         lines.append(f"Aceita flags: {'sim' if definition.accepts_flags else 'nao'}")

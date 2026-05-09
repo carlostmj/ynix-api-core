@@ -96,7 +96,7 @@ def _ask_password() -> str:
 
 
 def _parse_args(args: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(prog="python console/manage.py create:admin")
+    parser = argparse.ArgumentParser(prog="python console/manager.py make:admin")
     parser.add_argument("--name")
     parser.add_argument("--email")
     parser.add_argument("--password")

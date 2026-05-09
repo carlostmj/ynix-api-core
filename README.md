@@ -419,7 +419,6 @@ python console/manager.py make:repository web/user -a
 ```bash
 python console/manager.py make:observer web/user
 python console/manager.py make:observer web/user --model User
-python console/manager.py create:observer web/user
 ```
 
 O comando cria:
@@ -487,11 +486,13 @@ app/modules/web/user/migrations/2026_05_08_123456_create_users_table.py
 
 Quando o `--model` e informado, a migration criada registra a classe de referencia no stub gerado, deixando o arquivo pronto para automatizacoes e padronizacao futura.
 
-### Alias global
+### Compatibilidade com alias antigo
 
 ```bash
-python console/manager.py create:model web/user -a
+python console/manager.py make:model web/user -a
 ```
+
+O alias antigo `create:model` continua aceito, mas a forma padrao agora e `make:model`.
 
 ### Flags suportadas
 
@@ -579,14 +580,14 @@ class UserObserver(BaseObserver):
 
 ```bash
 python console/manager.py
-python console/manager.py create:admin
-python console/manager.py create:admin --name "Maria Admin" --email maria@example.com --password password123 --password-confirmation password123
+python console/manager.py make:admin
+python console/manager.py make:admin --name "Maria Admin" --email maria@example.com --password password123 --password-confirmation password123
 python console/manager.py status
 python console/manager.py help make:model
 python console/manager.py list
 ```
 
-`create:admin` suporta as flags `--name`, `--email`, `--password` e `--password-confirmation`.
+`make:admin` suporta as flags `--name`, `--email`, `--password` e `--password-confirmation`.
 
 ### Comandos disponiveis
 
@@ -594,15 +595,15 @@ python console/manager.py list
 - `make:controller`
 - `make:service`
 - `make:model`
-- `create:model`
 - `make:request`
 - `make:repository`
 - `make:observer`
-- `create:observer`
-- `create:admin`
+- `make:admin`
 - `status`
 - `help`
 - `list`
+
+Os antigos `create:model`, `create:observer` e `create:admin` continuam aceitos como alias de compatibilidade, mas nao aparecem na listagem.
 
 ### Comandos reservados para evolucao
 
@@ -830,7 +831,7 @@ O `BaseRepository` usa `fillable` ao criar ou atualizar registros a partir de di
 2. Ajuste `APP_NAME`, `DB_DATABASE`, `JWT_SECRET` e `API_KEY_PREFIX`.
 3. Crie o modulo inicial com `make:module` ou `make:model --all` para receber model e migration inicial.
 4. Rode `python console/manager.py migrate`.
-5. Crie o admin inicial com `create:admin`.
+5. Crie o admin inicial com `make:admin`.
 6. Inicie com `python run.py serve --reload`.
 
 ## Exemplo De Uso

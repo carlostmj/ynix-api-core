@@ -8,11 +8,14 @@ def test_console_list_shows_registered_commands(capsys):
     output = capsys.readouterr().out
     assert "Comandos disponiveis:" in output
     assert "make:model" in output
-    assert "create:admin" in output
+    assert "make:admin" in output
     assert "make:request" in output
     assert "migrate:status" in output
     assert "migrate:reset" in output
     assert "migrate:fresh" in output
+    assert "create:model" not in output
+    assert "create:observer" not in output
+    assert "create:admin" not in output
 
 
 def test_console_help_shows_command_details(capsys):
@@ -62,3 +65,4 @@ def test_kernel_render_list_includes_help_text():
     rendered = kernel.render_list()
     assert "make:model - Cria um scaffold parcial ou completo a partir de um model" in rendered
     assert "help - Mostra ajuda" in rendered
+    assert "create:model" not in rendered
